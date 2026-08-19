@@ -1,0 +1,6 @@
+node_modules/
+public/
+.typwiki/cache/
+.typwiki/generated/
+*.log
+.DS_Store
