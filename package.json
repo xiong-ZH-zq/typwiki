@@ -1,0 +1,29 @@
+{
+  "name": "typwiki",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A small Typst-powered local wiki builder.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "tsx src/cli.ts check",
+    "build": "tsx src/cli.ts build",
+    "serve": "tsx src/cli.ts serve",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@fastify/static": "^8.2.0",
+    "chokidar": "^4.0.3",
+    "fastify": "^5.4.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
