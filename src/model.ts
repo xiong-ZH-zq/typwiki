@@ -79,7 +79,8 @@ export interface SitePage extends ParsedPage {
  * The `tags` field is a record where keys are tag names and values are arrays of page IDs that have that tag.
  */
 export interface SiteIndex {
-  version: 2;
+  version: 3;
+  baseUrl: string;
   routing: RoutingConfig;
   pages: SitePage[];
   tags: Record<string, string[]>;

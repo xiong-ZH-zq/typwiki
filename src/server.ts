@@ -12,7 +12,7 @@ import type { TypwikiConfig } from "../typwiki.config.js";
 import type { Diagnostic, SiteIndex } from "./model.js";
 import { formatDiagnostic, TypwikiError } from "./model.js";
 import { buildSite } from "./pipeline.js";
-import { normalizeRouting, pageOutputRoot, pageUrlPath } from "./routing.js";
+import { normalizeRouting, pageHref, pageOutputRoot } from "./routing.js";
 
 const reloadScript = `<script>
 const source = new EventSource('/__typwiki/events');
@@ -56,7 +56,7 @@ export async function startServer(config: TypwikiConfig): Promise<void> {
 
   app.get("/", async (_request, reply) => {
     const index = await readIndex(config);
-    const items = index.pages.map((page) => `<li><a href="${pageUrlPath(index.routing, page.id)}">${escapeHtml(page.title)}</a></li>`).join("");
+    const items = index.pages.map((page) => `<li><a href="${pageHref(index.baseUrl, index.routing, page.id)}">${escapeHtml(page.title)}</a></li>`).join("");
     return reply.type("text/html").send(`<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>typwiki</title><h1>typwiki</h1><ul>${items}</ul>${lastError ? `<pre>${escapeHtml(lastError)}</pre>` : ""}${reloadScript}`);
   });
 
@@ -110,12 +110,12 @@ export async function startServer(config: TypwikiConfig): Promise<void> {
   console.log(`Server started at: http://127.0.0.1:${config.port}`);
 }
 
-async function readIndex(config: TypwikiConfig): Promise<Pick<SiteIndex, "pages" | "routing">> {
+async function readIndex(config: TypwikiConfig): Promise<Pick<SiteIndex, "baseUrl" | "pages" | "routing">> {
   const path = join(config.root, config.generatedDir, "site-index.json");
   try {
-    return JSON.parse(await readFile(path, "utf8")) as Pick<SiteIndex, "pages" | "routing">;
+    return JSON.parse(await readFile(path, "utf8")) as Pick<SiteIndex, "baseUrl" | "pages" | "routing">;
   } catch {
-    return { pages: [], routing: normalizeRouting(config.routing) };
+    return { baseUrl: config.baseUrl, pages: [], routing: normalizeRouting(config.routing) };
   }
 }
 

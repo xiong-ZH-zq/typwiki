@@ -6,8 +6,8 @@
 #let index-path = "/.typwiki/generated/site-index.json"
 #let site-index() = json(index-path)
 #let page-url(id) = {
-  let prefix = site-index().routing.pagePrefix
-  prefix + "/" + id + "/"
+  let index = site-index()
+  index.baseUrl + index.routing.pagePrefix + "/" + id + "/"
 }
 #let known-page(id) = site-index().pages.filter(item => item.id == id).len() > 0
 

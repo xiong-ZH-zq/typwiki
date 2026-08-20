@@ -5,7 +5,7 @@
 import { PAGE_ID_PATTERN, type Diagnostic, type ParsedPage, type RoutingConfig, type SiteCheckResult, TypwikiError } from "./model.js";
 import { validatePageRoutes } from "./routing.js";
 
-export function buildSiteIndex(pages: ParsedPage[], routing: RoutingConfig): SiteCheckResult {
+export function buildSiteIndex(pages: ParsedPage[], routing: RoutingConfig, baseUrl: string): SiteCheckResult {
   const errors: Diagnostic[] = [];
   const warnings: Diagnostic[] = [];
   const byId = new Map<string, ParsedPage>();
@@ -42,7 +42,8 @@ export function buildSiteIndex(pages: ParsedPage[], routing: RoutingConfig): Sit
   return {
     diagnostics: warnings,
     index: {
-      version: 2,
+      version: 3,
+      baseUrl,
       routing,
       pages: [...pages]
         .sort((left, right) => left.id.localeCompare(right.id))

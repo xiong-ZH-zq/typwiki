@@ -73,7 +73,11 @@ routing: {
 },
 ```
 
-This produces `/p/math/linear-algebra/` for `id: "math/linear-algebra"`. Change `pagePrefix` to `"/wiki"` to publish pages below `/wiki/`. Typwiki always reserves `/` and `/__typwiki` for its root page and development endpoints; `reservedPaths` reserves additional paths and their descendants.
+This produces `/p/math/linear-algebra/` for `id: "math/linear-algebra"`. `pagePrefix` controls the generated page directory and local development route. Typwiki always reserves `/` and `/__typwiki` for its root page and development endpoints; `reservedPaths` reserves additional paths and their descendants.
+
+### GitHub Pages
+
+The Pages workflow builds `public/index.html` as the site entry point and automatically sets `TYPWIKI_BASE_URL` to the repository name. For a repository named `typwiki`, GitHub Pages links become `/typwiki/p/<page-id>/` while generated content remains in `public/p/<page-id>/`. Do not put the repository name in `pagePrefix`; the workflow supplies it during deployment.
 
 ### Custom Environments
 

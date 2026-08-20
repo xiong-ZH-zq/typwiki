@@ -9,7 +9,7 @@ import { discoverPages } from "./discovery.js";
 import { buildSiteIndex } from "./graph.js";
 import { writeSiteIndex } from "./index-writer.js";
 import type { SiteCheckResult } from "./model.js";
-import { normalizeRouting } from "./routing.js";
+import { normalizeBaseUrl, normalizeRouting } from "./routing.js";
 import { renderSite } from "./renderer.js";
 import { TypstAdapter } from "./typst-adapter.js";
 
@@ -18,7 +18,7 @@ export async function checkSite(config: TypwikiConfig): Promise<SiteCheckResult>
   const files = await discoverPages(config.root, config.pagesDir);
   const adapter = new TypstAdapter({ root: config.root, typstBin: config.typstBin });
   const pages = await Promise.all(files.map((file) => adapter.parsePage(file)));
-  return buildSiteIndex(pages, normalizeRouting(config.routing));
+  return buildSiteIndex(pages, normalizeRouting(config.routing), normalizeBaseUrl(config.baseUrl));
 }
 
 export async function buildSite(config: TypwikiConfig): Promise<SiteCheckResult> {
@@ -32,5 +32,5 @@ export async function buildSite(config: TypwikiConfig): Promise<SiteCheckResult>
 async function ensureSeedIndex(config: TypwikiConfig): Promise<void> {
   const indexPath = join(config.root, config.generatedDir, "site-index.json");
   await mkdir(join(config.root, config.generatedDir), { recursive: true });
-  await writeSiteIndex(indexPath, { version: 2, routing: normalizeRouting(config.routing), pages: [], tags: {} });
+  await writeSiteIndex(indexPath, { version: 3, baseUrl: normalizeBaseUrl(config.baseUrl), routing: normalizeRouting(config.routing), pages: [], tags: {} });
 }
