@@ -1,11 +1,15 @@
 // typwiki.typ
 // This is the default template file for Typwiki.
 // It defines the page, wiki, and tags macros for use in Typwiki pages.
-// Author: xzqbear
 
 // The page macro defines a page with a given body, id, title, and table options.
 #let index-path = "/.typwiki/generated/site-index.json"
-
+#let site-index() = json(index-path)
+#let page-url(id) = {
+  let prefix = site-index().routing.pagePrefix
+  prefix + "/" + id + "/"
+}
+#let known-page(id) = site-index().pages.filter(item => item.id == id).len() > 0
 
 #let thmenvironment(name, kind: none) = {
   let environment-kind = if kind == none { "typwiki-" + name } else { kind }
@@ -98,7 +102,7 @@
       let backlinks = if current == none { () } else { current.backlinks }
       if backlinks.len() > 0 [
         #heading(level: 2)[Backlinks]
-        #list(..backlinks.map(target => link("/p/" + target + "/")[#target]))
+        #list(..backlinks.map(target => link(page-url(target))[#target]))
       ]
     }
 
@@ -111,7 +115,7 @@
           table.header([Tags], [Pages with this tag]),
           ..tags.map(tag => (
             raw(tag),
-            index.tags.at(tag, default: ()).map(target => link("/p/" + target + "/")[#target]).join([、]),
+            index.tags.at(tag, default: ()).map(target => link(page-url(target))[#target]).join([、]),
           )).flatten(),
         )
       ]
@@ -122,7 +126,11 @@
 // The wiki macro defines a link to another page with a given target and body.
 #let wiki(target, body) = [
   #metadata((kind: "link", target: target)) <typwiki-link>
-  #link("/p/" + target + "/")[#body]
+  #if known-page(target) {
+    link(page-url(target))[#body]
+  } else {
+    body
+  }
 ]
 
 // The tags macro defines a list of tags for a page.
