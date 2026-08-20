@@ -7,12 +7,15 @@
 import { readFile } from "node:fs/promises";
 import { join, relative, resolve, sep } from "node:path";
 import Fastify from "fastify";
+import fastifyStatic from "@fastify/static";
 import chokidar from "chokidar";
 import type { TypwikiConfig } from "../typwiki.config.js";
 import type { Diagnostic, SiteIndex } from "./model.js";
 import { formatDiagnostic, TypwikiError } from "./model.js";
 import { buildSite } from "./pipeline.js";
-import { normalizeRouting, pageHref, pageOutputRoot } from "./routing.js";
+import { renderHomePage } from "./renderer.js";
+import { themeStylesheetHref } from "./assets.js";
+import { normalizeRouting, pageOutputRoot } from "./routing.js";
 
 const reloadScript = `<script>
 const source = new EventSource('/__typwiki/events');
@@ -44,6 +47,11 @@ export async function startServer(config: TypwikiConfig): Promise<void> {
   let lastDiagnostics: Diagnostic[] = [];
   const clients = new Set<import("node:http").ServerResponse>();
   const app = Fastify({ logger: false });
+  await app.register(fastifyStatic, {
+    root: resolve(config.root, config.publicDir, "assets"),
+    prefix: "/assets/",
+    decorateReply: false,
+  });
 
   try {
     const result = await buildSite(config);
@@ -56,8 +64,8 @@ export async function startServer(config: TypwikiConfig): Promise<void> {
 
   app.get("/", async (_request, reply) => {
     const index = await readIndex(config);
-    const items = index.pages.map((page) => `<li><a href="${pageHref(index.baseUrl, index.routing, page.id)}">${escapeHtml(page.title)}</a></li>`).join("");
-    return reply.type("text/html").send(`<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>typwiki</title><h1>typwiki</h1><ul>${items}</ul>${lastError ? `<pre>${escapeHtml(lastError)}</pre>` : ""}${reloadScript}`);
+    const html = renderHomePage(index, themeStylesheetHref(index.baseUrl, config.theme));
+    return reply.type("text/html").send(`${html.replace("</body>", `${lastError ? `<pre>${escapeHtml(lastError)}</pre>` : ""}${reloadScript}</body>`)}`);
   });
 
   const routing = normalizeRouting(config.routing);

@@ -7,6 +7,7 @@ export const config = {
   generatedDir: ".typwiki/generated",
   publicDir: "public",
   baseUrl: process.env.TYPWIKI_BASE_URL ?? "",
+  theme: "academic-paper",
   routing: {
     pagePrefix: "/p",
     reservedPaths: ["/assets"],

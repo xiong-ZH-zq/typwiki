@@ -60,6 +60,16 @@ Typst is a great typesetting system. See #wiki("knowledge/graph")[graph] for mor
 - `tag-table` displays the current page's tags and pages sharing each tag.
 - `link-table` displays backlinks to the current page.
 
+### Themes
+
+Themes are visual assets kept separate from page content and graph logic. The default `academic-paper` theme lives at `assets/themes/academic-paper/theme.css` and is selected in `typwiki.config.ts`:
+
+```ts
+theme: "academic-paper",
+```
+
+To create another theme, copy that directory to `assets/themes/<theme-id>/`, keep a `theme.css` file at its root, then change `theme` and rebuild. Theme assets are copied to `public/assets/themes/<theme-id>/`; the selected stylesheet is mounted automatically on generated pages and the static home page. The theme does not change page IDs, links, tags, or output routing.
+
 ### Page IDs and Routes
 
 A page ID is the stable target for `#wiki(...)`; it does not need to match the source file path. For example, `pages/drafts/linear-algebra-v3.typ` can declare `id: "math/linear-algebra"` and retain that ID when the file moves.

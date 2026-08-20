@@ -1,0 +1,101 @@
+:root {
+  color-scheme: light;
+  --paper: #f6f1e8;
+  --paper-raised: #fffdf8;
+  --ink: #252321;
+  --muted: #706a62;
+  --line: #d9d0c2;
+  --accent: #245b82;
+  --accent-soft: #e4eef4;
+  --code: #eee9df;
+  --shadow: 0 12px 30px rgba(66, 52, 34, 0.08);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--paper); }
+
+body {
+  max-width: 54rem;
+  margin: 0 auto;
+  padding: 3.5rem clamp(1.1rem, 4vw, 4rem) 5rem;
+  color: var(--ink);
+  background: var(--paper-raised);
+  font-size: 1.05rem;
+  line-height: 1.78;
+  box-shadow: var(--shadow);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #1c3d55;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 { margin: 0 0 2.5rem; font-size: clamp(2rem, 5vw, 3.1rem); }
+h2 { margin: 2.8rem 0 1rem; font-size: 1.75rem; border-bottom: 1px solid var(--line); padding-bottom: .35rem; }
+h3 { margin: 2rem 0 .7rem; font-size: 1.35rem; }
+h4 { margin: 1.4rem 0 .5rem; font-size: 1.1rem; }
+
+p { margin: 0 0 1rem; }
+a { color: var(--accent); text-decoration-thickness: .08em; text-underline-offset: .16em; }
+a:hover { color: #163e5d; }
+
+ul, ol { padding-left: 1.5rem; }
+li::marker { color: var(--accent); }
+
+blockquote {
+  margin: 1.5rem 0;
+  padding: .7rem 1.2rem;
+  color: var(--muted);
+  border-left: 3px solid var(--accent);
+  background: #f2eee6;
+}
+
+pre, code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: .88em;
+}
+
+code { padding: .12em .3em; background: var(--code); border-radius: 3px; }
+pre { overflow-x: auto; margin: 1.3rem 0; padding: 1.1rem 1.2rem; color: #2f3540; background: var(--code); border: 1px solid var(--line); border-radius: 5px; line-height: 1.55; }
+pre code { padding: 0; background: transparent; }
+
+math[display="block"] { display: block; overflow-x: auto; margin: 1.5rem 0; padding: 1rem; background: #fbf8f1; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+
+table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; font-size: .95em; }
+th, td { padding: .65rem .75rem; text-align: left; border-bottom: 1px solid var(--line); }
+th { color: #1c3d55; background: var(--accent-soft); font-weight: 600; }
+tbody tr:nth-child(even) { background: #fbf8f1; }
+
+.typwiki-environment {
+  margin: 1.6rem 0;
+  padding: 1rem 1.2rem 1.1rem;
+  background: #f8f5ee;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 4px;
+}
+.typwiki-environment p:last-child { margin-bottom: 0; }
+[data-typwiki-kind="typwiki-Theorem"] { border-left-color: #245b82; }
+[data-typwiki-kind="typwiki-Lemma"] { border-left-color: #6b5b3e; }
+[data-typwiki-kind="typwiki-Definition"] { border-left-color: #6d7b52; }
+
+figure { margin: 1.5rem 0; }
+section[role="doc-bibliography"], section[role="doc-endnotes"] { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+
+@media (max-width: 38rem) {
+  body { padding: 2rem 1rem 3rem; font-size: 1rem; box-shadow: none; }
+  h1 { margin-bottom: 1.8rem; }
+  h2 { margin-top: 2.1rem; }
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root { color-scheme: dark; --paper: #1f2428; --paper-raised: #252b30; --ink: #e8e3da; --muted: #b6afa4; --line: #4b5359; --accent: #91c6e7; --accent-soft: #304451; --code: #30373b; --shadow: none; }
+  html, body { background: var(--paper-raised); }
+  h1, h2, h3, h4, h5, h6, th { color: #c9e2f1; }
+  blockquote, math[display="block"], tbody tr:nth-child(even), .typwiki-environment { background: #2b3237; }
+  pre { color: #e8e3da; }
+}
