@@ -85,6 +85,16 @@ routing: {
 
 This produces `/p/math/linear-algebra/` for `id: "math/linear-algebra"`. `pagePrefix` controls the generated page directory and local development route. Typwiki always reserves `/` and `/__typwiki` for its root page and development endpoints; `reservedPaths` reserves additional paths and their descendants.
 
+### Custom Homepage
+
+By default, `public/index.html` is a generated directory of all pages. To use one existing Typst page as the project homepage, set its stable page ID in `typwiki.config.ts`:
+
+```ts
+homePageId: "typwiki-intro",
+```
+
+The selected page is still generated at `/p/typwiki-intro/`; its rendered HTML is also used for the root `public/index.html`. The ID refers to the value passed to `page.with(id: ...)`, not to the source file path. The root copy preserves the selected page's URL base for relative assets and links. An unknown `homePageId` makes `npm run check` and `npm run build` fail with a diagnostic. `public/` is generated output and should not be edited by hand. Restart `npm run serve` after changing `homePageId`; configuration is loaded at startup.
+
 ### GitHub Pages
 
 The Pages workflow builds `public/index.html` as the site entry point and automatically sets `TYPWIKI_BASE_URL` to the repository name. For a repository named `typwiki`, GitHub Pages links become `/typwiki/p/<page-id>/` while generated content remains in `public/p/<page-id>/`. Do not put the repository name in `pagePrefix`; the workflow supplies it during deployment.
