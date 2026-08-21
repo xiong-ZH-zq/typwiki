@@ -62,7 +62,7 @@ code { padding: .12em .3em; background: var(--code); border-radius: 3px; }
 pre { overflow-x: auto; margin: 1.3rem 0; padding: 1.1rem 1.2rem; color: #2f3540; background: var(--code); border: 1px solid var(--line); border-radius: 5px; line-height: 1.55; }
 pre code { padding: 0; background: transparent; }
 
-math[display="block"] { display: block; overflow-x: auto; margin: 1.5rem 0; padding: 1rem; background: #fbf8f1; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+/* math[display="block"] { display: block; overflow-x: auto; margin: 1.5rem 0; padding: 1rem; background: #fbf8f1; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); } */
 
 table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; font-size: .95em; }
 th, td { padding: .65rem .75rem; text-align: left; border-bottom: 1px solid var(--line); }
