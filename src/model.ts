@@ -54,9 +54,24 @@ export interface TagsMetadata {
 /**
  * ParsedPage represents a fully parsed page, including its file path, ID, title,
  * whether it displays tag and link tables, its outgoing links, and its tags.
- * 
+ *
  * The `outgoing` field is an array of page IDs that this page links to.
  * The `tags` field is an array of tag names associated with this page.
+ * The `modifiedAt` field is the source file modification time in epoch
+ * milliseconds; it is optional so callers that build pages synthetically do
+ * not need to provide it.
+ *
+ * @example
+ * const page: ParsedPage = {
+ *   file: "pages/math/linear-algebra.typ",
+ *   id: "math/linear-algebra",
+ *   title: "Linear Algebra",
+ *   tagTable: false,
+ *   linkTable: false,
+ *   outgoing: ["math/matrices"],
+ *   tags: ["topic/mathematics"],
+ *   modifiedAt: 1756000000000,
+ * };
  */
 export interface ParsedPage {
   file: string;
@@ -66,6 +81,7 @@ export interface ParsedPage {
   linkTable: boolean;
   outgoing: string[];
   tags: string[];
+  modifiedAt?: number;
 }
 
 export interface SitePage extends ParsedPage {

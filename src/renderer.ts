@@ -6,12 +6,13 @@ import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { TypwikiConfig } from "../typwiki.config.js";
-import type { SiteIndex } from "./model.js";
+import type { SiteIndex, SitePage } from "./model.js";
 import { TypwikiError } from "./model.js";
 import { publishTheme, themeStylesheetHref } from "./assets.js";
 import { pageHref, pageOutputPath } from "./routing.js";
 
 export async function renderSite(config: TypwikiConfig, index: SiteIndex): Promise<void> {
+  const homePage = config.homePageId === undefined ? undefined : resolveHomePage(index, config.homePageId);
   await publishTheme(config.root, config.publicDir, config.theme);
   const stylesheet = themeStylesheetHref(index.baseUrl, config.theme);
 
@@ -29,14 +30,27 @@ export async function renderSite(config: TypwikiConfig, index: SiteIndex): Promi
       output,
     ]);
     if (result.exitCode !== 0) {
-      throw new TypwikiError([{ file: page.file, message: result.stderr.trim() || "Typst HTML 编译失败。" }]);
+      throw new TypwikiError([{ file: page.file, message: result.stderr.trim() || "Typst HTML compilation failed." }]);
     }
     await injectThemeIntoFile(output, stylesheet);
   }
 
   const home = join(config.root, config.publicDir, "index.html");
   await mkdir(dirname(home), { recursive: true });
-  await writeFile(home, renderHomePage(index, stylesheet), "utf8");
+  if (homePage) {
+    const pageHtml = await readFile(pageOutputPath(config.root, config.publicDir, index.routing, homePage.id), "utf8");
+    await writeFile(home, injectPageBase(pageHtml, pageHref(index.baseUrl, index.routing, homePage.id)), "utf8");
+  } else {
+    await writeFile(home, renderHomePage(index, stylesheet), "utf8");
+  }
+}
+
+export function resolveHomePage(index: SiteIndex, pageId: string): SitePage {
+  const page = index.pages.find((candidate) => candidate.id === pageId);
+  if (!page) {
+    throw new TypwikiError([{ message: `Configured homepage page ID does not exist: ${pageId}` }]);
+  }
+  return page;
 }
 
 export function themeLink(stylesheet: string): string {
@@ -47,13 +61,20 @@ export function injectTheme(html: string, stylesheet: string): string {
   const link = themeLink(stylesheet);
   if (html.includes(link)) return html;
   const headEnd = html.indexOf("</head>");
-  if (headEnd < 0) throw new TypwikiError([{ message: "Typst HTML 缺少 </head>，无法注入主题。" }]);
+  if (headEnd < 0) throw new TypwikiError([{ message: "Typst HTML is missing </head>; cannot inject the theme." }]);
   return `${html.slice(0, headEnd)}${link}${html.slice(headEnd)}`;
 }
 
 export async function injectThemeIntoFile(file: string, stylesheet: string): Promise<void> {
   const html = await readFile(file, "utf8");
   await writeFile(file, injectTheme(html, stylesheet), "utf8");
+}
+
+function injectPageBase(html: string, href: string): string {
+  if (html.includes("<base ")) return html;
+  const headEnd = html.indexOf("</head>");
+  if (headEnd < 0) throw new TypwikiError([{ message: "Typst HTML is missing </head>; cannot set homepage asset base." }]);
+  return `${html.slice(0, headEnd)}<base href="${escapeHtml(href)}">${html.slice(headEnd)}`;
 }
 
 export function renderHomePage(index: Pick<SiteIndex, "baseUrl" | "routing" | "pages">, stylesheet = themeStylesheetHref(index.baseUrl, "academic-paper")): string {

@@ -3,7 +3,7 @@
 
 #show: page.with(
   id: "typwiki-intro",
-  title: "Typwiki",
+  title: "Typwiki Introduction",
   tag-table: true,
   link-table: true,
 )
@@ -123,4 +123,4 @@ Notice that the proposition is also automatically numbered and can be referenced
 Typwiki plans to support CeTZ, a Typst extension for creating interactive content. This will allow users to create dynamic and interactive pages within their Typwiki. For example, you can create interactive diagrams, quizzes, and more.
 
 
-#bibliography("../bib/ref.bib", style: "chicago-author-date")
+#bibliography("../../bib/ref.bib", style: "chicago-author-date")

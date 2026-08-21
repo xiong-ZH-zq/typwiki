@@ -10,7 +10,7 @@ import { buildSiteIndex } from "./graph.js";
 import { writeSiteIndex } from "./index-writer.js";
 import type { SiteCheckResult } from "./model.js";
 import { normalizeBaseUrl, normalizeRouting } from "./routing.js";
-import { renderSite } from "./renderer.js";
+import { renderSite, resolveHomePage } from "./renderer.js";
 import { TypstAdapter } from "./typst-adapter.js";
 
 export async function checkSite(config: TypwikiConfig): Promise<SiteCheckResult> {
@@ -18,7 +18,9 @@ export async function checkSite(config: TypwikiConfig): Promise<SiteCheckResult>
   const files = await discoverPages(config.root, config.pagesDir);
   const adapter = new TypstAdapter({ root: config.root, typstBin: config.typstBin });
   const pages = await Promise.all(files.map((file) => adapter.parsePage(file)));
-  return buildSiteIndex(pages, normalizeRouting(config.routing), normalizeBaseUrl(config.baseUrl));
+  const index = buildSiteIndex(pages, normalizeRouting(config.routing), normalizeBaseUrl(config.baseUrl));
+  if (config.homePageId !== undefined) resolveHomePage(index.index, config.homePageId);
+  return index;
 }
 
 export async function buildSite(config: TypwikiConfig): Promise<SiteCheckResult> {

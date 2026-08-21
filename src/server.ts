@@ -10,11 +10,9 @@ import Fastify from "fastify";
 import fastifyStatic from "@fastify/static";
 import chokidar from "chokidar";
 import type { TypwikiConfig } from "../typwiki.config.js";
-import type { Diagnostic, SiteIndex } from "./model.js";
+import type { Diagnostic } from "./model.js";
 import { formatDiagnostic, TypwikiError } from "./model.js";
 import { buildSite } from "./pipeline.js";
-import { renderHomePage } from "./renderer.js";
-import { themeStylesheetHref } from "./assets.js";
 import { normalizeRouting, pageOutputRoot } from "./routing.js";
 
 const reloadScript = `<script>
@@ -63,9 +61,15 @@ export async function startServer(config: TypwikiConfig): Promise<void> {
   }
 
   app.get("/", async (_request, reply) => {
-    const index = await readIndex(config);
-    const html = renderHomePage(index, themeStylesheetHref(index.baseUrl, config.theme));
-    return reply.type("text/html").send(`${html.replace("</body>", `${lastError ? `<pre>${escapeHtml(lastError)}</pre>` : ""}${reloadScript}</body>`)}`);
+    const home = join(config.root, config.publicDir, "index.html");
+    let html: string;
+    try {
+      html = await readFile(home, "utf8");
+    } catch {
+      html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Typwiki</title></head><body><h1>Typwiki</h1><p>Homepage is waiting for the first successful build.</p></body></html>`;
+    }
+    const diagnostics = lastError ? `<pre>${escapeHtml(lastError)}</pre>` : "";
+    return reply.type("text/html; charset=utf-8").send(injectReloadScript(html, diagnostics));
   });
 
   const routing = normalizeRouting(config.routing);
@@ -81,7 +85,7 @@ export async function startServer(config: TypwikiConfig): Promise<void> {
       const html = await readFile(candidate, "utf8");
       return reply.type("text/html; charset=utf-8").send(injectReloadScript(html));
     } catch {
-      return reply.code(404).type("text/plain; charset=utf-8").send("页面不存在。");
+      return reply.code(404).type("text/plain; charset=utf-8").send("Page not found.");
     }
   });
 
@@ -95,7 +99,7 @@ export async function startServer(config: TypwikiConfig): Promise<void> {
   });
 
   let timer: NodeJS.Timeout | undefined;
-  const watcher = chokidar.watch([join(config.root, config.pagesDir), join(config.root, config.libDir), join(config.root, "assets"), join(config.root, "typwiki.config.ts")], { ignoreInitial: true });
+  const watcher = chokidar.watch([join(config.root, config.pagesDir), join(config.root, config.libDir), join(config.root, "assets")], { ignoreInitial: true });
   watcher.on("all", () => {
     if (timer) clearTimeout(timer);
     timer = setTimeout(async () => {
@@ -118,21 +122,12 @@ export async function startServer(config: TypwikiConfig): Promise<void> {
   console.log(`Server started at: http://127.0.0.1:${config.port}`);
 }
 
-async function readIndex(config: TypwikiConfig): Promise<Pick<SiteIndex, "baseUrl" | "pages" | "routing">> {
-  const path = join(config.root, config.generatedDir, "site-index.json");
-  try {
-    return JSON.parse(await readFile(path, "utf8")) as Pick<SiteIndex, "baseUrl" | "pages" | "routing">;
-  } catch {
-    return { baseUrl: config.baseUrl, pages: [], routing: normalizeRouting(config.routing) };
-  }
-}
-
 function broadcast(clients: Set<import("node:http").ServerResponse>, event: "reload" | "build-error"): void {
   for (const client of clients) client.write(`event: ${event}\ndata: changed\n\n`);
 }
 
-function injectReloadScript(html: string): string {
-  return html.includes("</body>") ? html.replace("</body>", `${reloadScript}</body>`) : `${html}${reloadScript}`;
+function injectReloadScript(html: string, content = ""): string {
+  return html.includes("</body>") ? html.replace("</body>", `${content}${reloadScript}</body>`) : `${html}${content}${reloadScript}`;
 }
 
 function messageFor(error: unknown): string {
