@@ -22,6 +22,29 @@ export interface RoutingConfig {
   reservedPaths: string[];
 }
 
+/**
+ * A single entry in the user-configured header navigation. Entries either
+ * reference a stable page id (optionally overriding its label) or point at a
+ * custom/external href with an explicit label. Exactly one of `id` or `href`
+ * must be set.
+ *
+ * @example
+ * // Link to an existing page, using its title as the label.
+ * { id: "articles/typwiki-intro" }
+ * // Link to a page under a custom label.
+ * { id: "articles/typwiki-intro", label: "Guide" }
+ * // Link to an external site.
+ * { href: "https://github.com/xzqbear/typwiki", label: "GitHub" }
+ */
+export interface NavigationEntry {
+  /** A stable page id from the site index; the label defaults to the page title. */
+  id?: string;
+  /** The link label; required for `href` entries and optional overrides for `id` entries. */
+  label?: string;
+  /** A custom href for external or non-page links; mutually exclusive with `id`. */
+  href?: string;
+}
+
 /** 
  * PageMetadata represents the metadata of a page.
  * 
@@ -90,9 +113,11 @@ export interface SitePage extends ParsedPage {
 
 /**
  * SiteIndex represents the index of a site, including its version, pages, and tags.
- * 
+ *
  * The `pages` field is an array of SitePage objects, each representing a page in the site.
  * The `tags` field is a record where keys are tag names and values are arrays of page IDs that have that tag.
+ * The optional `navigation` field carries the user-configured header navigation;
+ * when absent the shell falls back to rendering every page as a navigation tree.
  */
 export interface SiteIndex {
   version: 3;
@@ -100,6 +125,7 @@ export interface SiteIndex {
   routing: RoutingConfig;
   pages: SitePage[];
   tags: Record<string, string[]>;
+  navigation?: NavigationEntry[];
 }
 
 export interface SiteCheckResult {

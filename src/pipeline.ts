@@ -18,7 +18,7 @@ export async function checkSite(config: TypwikiConfig): Promise<SiteCheckResult>
   const files = await discoverPages(config.root, config.pagesDir);
   const adapter = new TypstAdapter({ root: config.root, typstBin: config.typstBin });
   const pages = await Promise.all(files.map((file) => adapter.parsePage(file)));
-  const index = buildSiteIndex(pages, normalizeRouting(config.routing), normalizeBaseUrl(config.baseUrl));
+  const index = buildSiteIndex(pages, normalizeRouting(config.routing), normalizeBaseUrl(config.baseUrl), config.navigation);
   if (config.homePageId !== undefined) resolveHomePage(index.index, config.homePageId);
   return index;
 }
@@ -34,5 +34,12 @@ export async function buildSite(config: TypwikiConfig): Promise<SiteCheckResult>
 async function ensureSeedIndex(config: TypwikiConfig): Promise<void> {
   const indexPath = join(config.root, config.generatedDir, "site-index.json");
   await mkdir(join(config.root, config.generatedDir), { recursive: true });
-  await writeSiteIndex(indexPath, { version: 3, baseUrl: normalizeBaseUrl(config.baseUrl), routing: normalizeRouting(config.routing), pages: [], tags: {} });
+  await writeSiteIndex(indexPath, {
+    version: 3,
+    baseUrl: normalizeBaseUrl(config.baseUrl),
+    routing: normalizeRouting(config.routing),
+    pages: [],
+    tags: {},
+    ...(config.navigation === undefined ? {} : { navigation: config.navigation }),
+  });
 }

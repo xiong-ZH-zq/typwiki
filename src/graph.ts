@@ -2,10 +2,10 @@
 // This module provides the core graph-building functionality for Typwiki.
 // It includes a function to build the site index from parsed pages, validating page IDs, connections, and tags.
 
-import { PAGE_ID_PATTERN, type Diagnostic, type ParsedPage, type RoutingConfig, type SiteCheckResult, TypwikiError } from "./model.js";
+import { PAGE_ID_PATTERN, type Diagnostic, type NavigationEntry, type ParsedPage, type RoutingConfig, type SiteCheckResult, TypwikiError } from "./model.js";
 import { validatePageRoutes } from "./routing.js";
 
-export function buildSiteIndex(pages: ParsedPage[], routing: RoutingConfig, baseUrl: string): SiteCheckResult {
+export function buildSiteIndex(pages: ParsedPage[], routing: RoutingConfig, baseUrl: string, navigation?: NavigationEntry[]): SiteCheckResult {
   const errors: Diagnostic[] = [];
   const warnings: Diagnostic[] = [];
   const byId = new Map<string, ParsedPage>();
@@ -19,6 +19,18 @@ export function buildSiteIndex(pages: ParsedPage[], routing: RoutingConfig, base
   for (const page of pages) {
     for (const target of page.outgoing) {
       if (!byId.has(target)) warnings.push({ severity: "warning", file: page.file, message: `Connection target does not exist: ${target}` });
+    }
+  }
+
+  for (const entry of navigation ?? []) {
+    if (entry.id !== undefined && entry.href !== undefined) {
+      errors.push({ severity: "error", message: `Navigation entry cannot set both id and href: ${entry.label ?? entry.id}` });
+    }
+    if (entry.id === undefined && entry.href === undefined) {
+      errors.push({ severity: "error", message: `Navigation entry must set id or href: ${entry.label ?? "(unnamed)"}` });
+    }
+    if (entry.id !== undefined && !byId.has(entry.id)) {
+      warnings.push({ severity: "warning", message: `Navigation target does not exist: ${entry.id}` });
     }
   }
   errors.push(...validatePageRoutes(pages, routing).map((diagnostic) => ({ ...diagnostic, severity: "error" as const })));
@@ -49,6 +61,7 @@ export function buildSiteIndex(pages: ParsedPage[], routing: RoutingConfig, base
         .sort((left, right) => left.id.localeCompare(right.id))
         .map((page) => ({ ...page, backlinks: [...(backlinks.get(page.id) ?? [])].sort() })),
       tags: Object.fromEntries([...tags.entries()].sort(([left], [right]) => left.localeCompare(right)).map(([tag, ids]) => [tag, [...ids].sort()])),
+      ...(navigation === undefined ? {} : { navigation }),
     },
   };
 }
