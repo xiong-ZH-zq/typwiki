@@ -4,8 +4,11 @@
 // never runs Typst, and never mutates the graph. Every exported function is a
 // pure function so each shell region can be tested and styled independently.
 
-import type { NavigationEntry, SiteIndex, SitePage } from "./model.js";
-import { normalizeBaseUrl, pageHref } from "./routing.js";
+import { escapeHtml } from './build/html.js';
+import type { NavigationEntry, SiteIndex, SitePage } from './model.js';
+import { normalizeBaseUrl, pageHref } from './routing.js';
+
+export { escapeHtml };
 
 /** A node in the slash-separated navigation tree. */
 export interface NavNode {
@@ -27,19 +30,6 @@ export interface Heading {
   id: string;
   /** Plain-text heading content with all markup and entities removed. */
   title: string;
-}
-
-/**
- * Escapes text so it can be safely embedded in HTML or attribute values.
- *
- * @param value The raw text to escape.
- * @returns The input with `&`, `<`, `>`, and `"` replaced by their entities.
- *
- * @example
- * escapeHtml(`A <b> & "c"`); // "A &lt;b&gt; &amp; &quot;c&quot;"
- */
-export function escapeHtml(value: string): string {
-  return value.replace(/[&<>"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[character] ?? character);
 }
 
 /**
@@ -72,10 +62,10 @@ export function slugify(text: string): string {
   const slug = text
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9一-鿿]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  return slug === "" ? "section" : slug;
+    .replace(/[^a-z0-9一-鿿]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return slug === '' ? 'section' : slug;
 }
 
 /**
@@ -97,7 +87,7 @@ export function buildNavigationTree(pages: SitePage[]): NavNode {
   const root: NavNode = { children: new Map() };
   for (const page of pages) {
     let node = root;
-    for (const segment of page.id.split("/")) {
+    for (const segment of page.id.split('/')) {
       let child = node.children.get(segment);
       if (child === undefined) {
         child = { children: new Map() };
@@ -120,14 +110,14 @@ function renderNavLevel(node: NavNode, index: SiteIndex, currentPageId: string):
       );
     } else {
       const active = child.page.id === currentPageId;
-      const classes = active ? "typwiki-nav-link is-active" : "typwiki-nav-link";
-      const ariaCurrent = active ? ' aria-current="page"' : "";
+      const classes = active ? 'typwiki-nav-link is-active' : 'typwiki-nav-link';
+      const ariaCurrent = active ? ' aria-current="page"' : '';
       items.push(
         `<li><a href="${escapeHtml(pageHref(index.baseUrl, index.routing, child.page.id))}" class="${classes}"${ariaCurrent}>${escapeHtml(child.page.title)}</a></li>`,
       );
     }
   }
-  return `<ul>${items.join("")}</ul>`;
+  return `<ul>${items.join('')}</ul>`;
 }
 
 /**
@@ -166,19 +156,19 @@ function renderConfiguredNavigation(entries: NavigationEntry[], index: SiteIndex
     if (entry.id !== undefined) {
       const page = byId.get(entry.id);
       const active = entry.id === currentPageId;
-      const classes = active ? "typwiki-nav-link is-active" : "typwiki-nav-link";
-      const ariaCurrent = active ? ' aria-current="page"' : "";
+      const classes = active ? 'typwiki-nav-link is-active' : 'typwiki-nav-link';
+      const ariaCurrent = active ? ' aria-current="page"' : '';
       const label = entry.label ?? page?.title ?? entry.id;
-      const href = page === undefined ? "#" : pageHref(index.baseUrl, index.routing, entry.id);
-      const missing = page === undefined ? ' class="typwiki-missing-link"' : "";
+      const href = page === undefined ? '#' : pageHref(index.baseUrl, index.routing, entry.id);
+      const missing = page === undefined ? ' class="typwiki-missing-link"' : '';
       return `<li><a href="${escapeHtml(href)}" class="${classes}"${ariaCurrent}${missing}>${escapeHtml(label)}</a></li>`;
     }
-    const label = entry.label ?? entry.href ?? "";
-    const external = /^https?:\/\//i.test(entry.href ?? "");
-    const rel = external ? ' rel="noopener noreferrer" target="_blank"' : "";
-    return `<li><a href="${escapeHtml(entry.href ?? "#")}" class="typwiki-nav-link"${rel}>${escapeHtml(label)}</a></li>`;
+    const label = entry.label ?? entry.href ?? '';
+    const external = /^https?:\/\//i.test(entry.href ?? '');
+    const rel = external ? ' rel="noopener noreferrer" target="_blank"' : '';
+    return `<li><a href="${escapeHtml(entry.href ?? '#')}" class="typwiki-nav-link"${rel}>${escapeHtml(label)}</a></li>`;
   });
-  return `<ul>${items.join("")}</ul>`;
+  return `<ul>${items.join('')}</ul>`;
 }
 
 /**
@@ -193,11 +183,11 @@ function renderConfiguredNavigation(entries: NavigationEntry[], index: SiteIndex
  */
 export function renderTagCloud(index: SiteIndex): string {
   const tags = Object.keys(index.tags).sort();
-  if (tags.length === 0) return "";
+  if (tags.length === 0) return '';
   const items = tags.map(
     (tag) => `<li><span class="typwiki-tag">${escapeHtml(tag)}</span> <span class="typwiki-count">${index.tags[tag].length}</span></li>`,
   );
-  return `<ul class="typwiki-tag-cloud">${items.join("")}</ul>`;
+  return `<ul class="typwiki-tag-cloud">${items.join('')}</ul>`;
 }
 
 /**
@@ -218,11 +208,11 @@ export function renderRecentPages(index: SiteIndex, limit = 5): string {
   const timed = index.pages
     .filter((page) => page.modifiedAt !== undefined)
     .sort((left, right) => (right.modifiedAt ?? 0) - (left.modifiedAt ?? 0));
-  if (timed.length === 0) return "";
-  const items = timed.slice(0, limit).map(
-    (page) => `<li><a href="${escapeHtml(pageHref(index.baseUrl, index.routing, page.id))}">${escapeHtml(page.title)}</a></li>`,
-  );
-  return `<ul class="typwiki-recent-pages">${items.join("")}</ul>`;
+  if (timed.length === 0) return '';
+  const items = timed
+    .slice(0, limit)
+    .map((page) => `<li><a href="${escapeHtml(pageHref(index.baseUrl, index.routing, page.id))}">${escapeHtml(page.title)}</a></li>`);
+  return `<ul class="typwiki-recent-pages">${items.join('')}</ul>`;
 }
 
 /**
@@ -238,13 +228,13 @@ export function renderRecentPages(index: SiteIndex, limit = 5): string {
  * // '<ol class="typwiki-breadcrumbs"><li><a href="/">Home</a></li><li><a href="/p/math/">Mathematics</a></li><li>linear-algebra</li></ol>'
  */
 export function renderBreadcrumbs(index: SiteIndex, pageId: string): string {
-  const segments = pageId.split("/");
+  const segments = pageId.split('/');
   const byId = new Map(index.pages.map((page) => [page.id, page]));
   const items: string[] = [`<li><a href="${escapeHtml(siteHref(index.baseUrl))}">Home</a></li>`];
   const accumulated: string[] = [];
   for (let i = 0; i < segments.length; i++) {
     accumulated.push(segments[i]);
-    const path = accumulated.join("/");
+    const path = accumulated.join('/');
     const page = byId.get(path);
     if (i === segments.length - 1) {
       items.push(`<li aria-current="page">${escapeHtml(page?.title ?? segments[i])}</li>`);
@@ -254,7 +244,7 @@ export function renderBreadcrumbs(index: SiteIndex, pageId: string): string {
       items.push(`<li>${escapeHtml(segments[i])}</li>`);
     }
   }
-  return `<ol class="typwiki-breadcrumbs">${items.join("")}</ol>`;
+  return `<ol class="typwiki-breadcrumbs">${items.join('')}</ol>`;
 }
 
 /**
@@ -284,7 +274,7 @@ export function formatModifiedDate(page: SitePage): string | null {
  */
 export function renderProperties(page: SitePage): string {
   const date = formatModifiedDate(page);
-  const dateHtml = date === null ? "" : `<li><span>Modified</span><time datetime="${date}">${date}</time></li>`;
+  const dateHtml = date === null ? '' : `<li><span>Modified</span><time datetime="${date}">${date}</time></li>`;
   return `<ul class="typwiki-properties"><li><span>Page ID</span><code>${escapeHtml(page.id)}</code></li>${dateHtml}</ul>`;
 }
 
@@ -300,9 +290,9 @@ export function renderProperties(page: SitePage): string {
  * renderPageTags(page({ tags: [] })); // ""
  */
 export function renderPageTags(page: SitePage): string {
-  if (page.tags.length === 0) return "";
+  if (page.tags.length === 0) return '';
   const items = page.tags.map((tag) => `<li><span class="typwiki-tag">${escapeHtml(tag)}</span></li>`);
-  return `<ul class="typwiki-page-tags">${items.join("")}</ul>`;
+  return `<ul class="typwiki-page-tags">${items.join('')}</ul>`;
 }
 
 /**
@@ -320,14 +310,14 @@ export function renderPageTags(page: SitePage): string {
  * // '<h3 class="typwiki-link-list-title">Backlinks</h3><ul class="typwiki-link-list"><li><a href="/p/known/">Known</a></li><li><span class="typwiki-missing-link">missing</span></li></ul>'
  */
 export function renderPageLinkList(title: string, ids: string[], index: SiteIndex): string {
-  if (ids.length === 0) return "";
+  if (ids.length === 0) return '';
   const byId = new Map(index.pages.map((page) => [page.id, page]));
   const items = ids.map((id) => {
     const page = byId.get(id);
     if (page === undefined) return `<li><span class="typwiki-missing-link">${escapeHtml(id)}</span></li>`;
     return `<li><a href="${escapeHtml(pageHref(index.baseUrl, index.routing, page.id))}">${escapeHtml(page.title)}</a></li>`;
   });
-  return `<h3 class="typwiki-link-list-title">${escapeHtml(title)}</h3><ul class="typwiki-link-list">${items.join("")}</ul>`;
+  return `<h3 class="typwiki-link-list-title">${escapeHtml(title)}</h3><ul class="typwiki-link-list">${items.join('')}</ul>`;
 }
 
 /**
@@ -370,13 +360,20 @@ export function findRelatedPages(index: SiteIndex, pageId: string): SitePage[] {
  */
 export function renderRelationsPanel(index: SiteIndex, pageId: string): string {
   const page = index.pages.find((candidate) => candidate.id === pageId);
-  if (page === undefined) return "";
+  if (page === undefined) return '';
   const parts: string[] = [renderProperties(page), renderPageTags(page)];
-  parts.push(renderPageLinkList("Outgoing links", page.outgoing, index));
-  parts.push(renderPageLinkList("Backlinks", page.backlinks, index));
+  parts.push(renderPageLinkList('Outgoing links', page.outgoing, index));
+  parts.push(renderPageLinkList('Backlinks', page.backlinks, index));
   const related = findRelatedPages(index, pageId);
-  if (related.length > 0) parts.push(renderPageLinkList("Related pages", related.map((item) => item.id), index));
-  return parts.join("");
+  if (related.length > 0)
+    parts.push(
+      renderPageLinkList(
+        'Related pages',
+        related.map((item) => item.id),
+        index,
+      ),
+    );
+  return parts.join('');
 }
 
 /**
@@ -394,7 +391,7 @@ export function renderRelationsPanel(index: SiteIndex, pageId: string): string {
 export function renderHeader(index: SiteIndex, currentPageId?: string): string {
   const identity = `<p class="typwiki-site-identity"><a href="${escapeHtml(siteHref(index.baseUrl))}">Typwiki</a></p>`;
   const navigation =
-    currentPageId === undefined ? "" : `<nav data-typwiki-region="navigation">${renderNavigation(index, currentPageId)}</nav>`;
+    currentPageId === undefined ? '' : `<nav data-typwiki-region="navigation">${renderNavigation(index, currentPageId)}</nav>`;
   return `${identity}${navigation}`;
 }
 
@@ -412,7 +409,7 @@ export function renderHeader(index: SiteIndex, currentPageId?: string): string {
  */
 export function renderNavigationPanel(index: SiteIndex, currentPageId: string): string {
   const parts: string[] = [renderNavigation(index, currentPageId), renderTagCloud(index), renderRecentPages(index, 5)];
-  return parts.join("");
+  return parts.join('');
 }
 
 /**
@@ -426,7 +423,7 @@ export function renderNavigationPanel(index: SiteIndex, currentPageId: string): 
  * renderFooter(index([])); // '<p>Generated by Typwiki.</p>'
  */
 export function renderFooter(_index: SiteIndex): string {
-  return "<p>Generated by Typwiki.</p>";
+  return '<p>Generated by Typwiki.</p>';
 }
 
 /**
@@ -446,12 +443,12 @@ export function renderFooter(_index: SiteIndex): string {
  * // '<ol><li><a href="#intro">Introduction</a><ol><li><a href="#features">Features</a></li></ol></li><li><a href="#conclusion">Conclusion</a></li></ol>'
  */
 export function renderTableOfContents(headings: Heading[]): string {
-  if (headings.length === 0) return "";
+  if (headings.length === 0) return '';
   return buildTocList(headings);
 }
 
 function buildTocList(headings: Heading[]): string {
-  let html = "";
+  let html = '';
   let i = 0;
   while (i < headings.length) {
     const heading = headings[i];
@@ -463,7 +460,7 @@ function buildTocList(headings: Heading[]): string {
       k += 1;
     }
     if (deeper.length > 0) html += buildTocList(deeper);
-    html += "</li>";
+    html += '</li>';
     i = k;
   }
   return `<ol>${html}</ol>`;
@@ -488,8 +485,8 @@ export function extractHeadings(body: string): { headings: Heading[]; body: stri
   const usedIds = new Set<string>();
   const updated = body.replace(/<h([1-6])([^>]*)>([\s\S]*?)<\/h\1>/gi, (full, level, attrs, inner) => {
     const title = textContent(inner).trim();
-    if (title === "") return full;
-    const existing = findAttribute(attrs, "id");
+    if (title === '') return full;
+    const existing = findAttribute(attrs, 'id');
     if (existing !== undefined) {
       usedIds.add(existing);
       headings.push({ level: Number(level), id: existing, title });
@@ -514,16 +511,16 @@ function uniqueSlug(base: string, usedIds: Set<string>): string {
 }
 
 function findAttribute(attrs: string, name: string): string | undefined {
-  const match = new RegExp(`${name}="([^"]*)"`, "i").exec(attrs);
+  const match = new RegExp(`${name}="([^"]*)"`, 'i').exec(attrs);
   return match?.[1];
 }
 
 function textContent(html: string): string {
   return html
-    .replace(/<[^>]*>/g, "")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
+    .replace(/<[^>]*>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'");
 }
@@ -566,10 +563,10 @@ export interface DocumentShellOptions {
 export function renderDocumentShell(options: DocumentShellOptions): string {
   const { index, title, content, stylesheet, currentPageId, head, headings } = options;
   const isPage = currentPageId !== undefined;
-  const breadcrumbs = isPage ? renderBreadcrumbs(index, currentPageId!) : "";
-  const relations = isPage ? renderRelationsPanel(index, currentPageId!) : "";
-  const toc = headings === undefined || headings.length === 0 ? "" : renderTableOfContents(headings);
-  const articleId = isPage ? ` data-page-id="${escapeHtml(currentPageId!)}"` : "";
+  const breadcrumbs = isPage ? renderBreadcrumbs(index, currentPageId) : '';
+  const relations = isPage ? renderRelationsPanel(index, currentPageId) : '';
+  const toc = headings === undefined || headings.length === 0 ? '' : renderTableOfContents(headings);
+  const articleId = isPage ? ` data-page-id="${escapeHtml(currentPageId)}"` : '';
 
   return `<!doctype html>
 <html lang="zh-CN">
@@ -577,12 +574,12 @@ export function renderDocumentShell(options: DocumentShellOptions): string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)} · Typwiki</title>
-${head ?? ""}<link rel="stylesheet" href="${escapeHtml(stylesheet)}">
+${head ?? ''}<link rel="stylesheet" href="${escapeHtml(stylesheet)}">
 </head>
 <body>
 <a class="typwiki-skip-link" href="#typwiki-main">Skip to content</a>
 <header data-typwiki-region="header">${renderHeader(index, currentPageId)}</header>
-${breadcrumbs === "" ? "" : `<nav class="typwiki-breadcrumbs" aria-label="Breadcrumbs">${breadcrumbs}</nav>`}
+${breadcrumbs === '' ? '' : `<nav class="typwiki-breadcrumbs" aria-label="Breadcrumbs">${breadcrumbs}</nav>`}
 <main id="typwiki-main" data-typwiki-region="main">
 <aside data-typwiki-region="toc">${toc}</aside>
 <article class="typwiki-article"${articleId}>${content}</article>

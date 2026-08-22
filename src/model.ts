@@ -1,18 +1,17 @@
 // model.ts
 
-
 /**
- * Regex pattern for validating page IDs. A valid page ID consists of 
+ * Regex pattern for validating page IDs. A valid page ID consists of
  * lowercase letters, numbers, and hyphens, and can include slashes to represent nested pages.
- * 
+ *
  * Example of valid page IDs:
- * 
+ *
  * `"home"`, `"about-us"`, `"products/item-1"`, `"blog/2023/06/15/my-post"`
  */
 export const PAGE_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/;
 
 /**
- * TagValue can be string, number, boolean, null, an array of TagValues, 
+ * TagValue can be string, number, boolean, null, an array of TagValues,
  * or an object with string keys and TagValue values.
  */
 export type TagValue = string | number | boolean | null | TagValue[] | { [key: string]: TagValue };
@@ -45,13 +44,13 @@ export interface NavigationEntry {
   href?: string;
 }
 
-/** 
+/**
  * PageMetadata represents the metadata of a page.
- * 
+ *
  * Including its kind, ID, title, and whether it displays tag and link tables.
  */
 export interface PageMetadata {
-  kind: "page";
+  kind: 'page';
   id: string;
   title: string;
   tagTable: boolean;
@@ -62,7 +61,7 @@ export interface PageMetadata {
  * LinkMetadata represents the metadata of a link. See PageMetadata for more details.
  */
 export interface LinkMetadata {
-  kind: "link";
+  kind: 'link';
   target: string;
 }
 
@@ -70,7 +69,7 @@ export interface LinkMetadata {
  * TagsMetadata represents the metadata of tags. See PageMetadata for more details.
  */
 export interface TagsMetadata {
-  kind: "tags";
+  kind: 'tags';
   value: Record<string, TagValue>;
 }
 
@@ -135,26 +134,25 @@ export interface SiteCheckResult {
 
 /**
  * Diagnostic represents an error or warning message related to a specific file.
- * 
- * The `file` field is optional and can be omitted 
+ *
+ * The `file` field is optional and can be omitted
  * if the diagnostic is not related to a specific file.
  */
 export interface Diagnostic {
-  severity?: "warning" | "error";
+  severity?: 'warning' | 'error';
   file?: string;
   message: string;
 }
 
-
 /**
  * TypwikiError is a custom error class that represents errors related to Typwiki.
- * 
+ *
  * It contains an array of Diagnostic objects that provide detailed information about the errors.
  * The error message is constructed by formatting each diagnostic and joining them with newlines.
  */
 export class TypwikiError extends Error {
   constructor(public readonly diagnostics: Diagnostic[]) {
-    super(diagnostics.map((diagnostic) => formatDiagnostic(diagnostic)).join("\n"));
+    super(diagnostics.map((diagnostic) => formatDiagnostic(diagnostic)).join('\n'));
   }
 }
 
@@ -162,6 +160,6 @@ export class TypwikiError extends Error {
  * Formats a Diagnostic object into a string representation.
  */
 export function formatDiagnostic(diagnostic: Diagnostic): string {
-  const prefix = (diagnostic.severity ?? "error").toUpperCase();
+  const prefix = (diagnostic.severity ?? 'error').toUpperCase();
   return diagnostic.file ? `${prefix} ${diagnostic.file}: ${diagnostic.message}` : `${prefix} ${diagnostic.message}`;
 }

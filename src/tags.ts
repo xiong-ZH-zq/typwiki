@@ -2,17 +2,16 @@
 // This module provides utility functions for handling tags in Typwiki.
 // It includes a function to flatten nested tag structures into a sorted array of strings.
 
-import type { TagValue } from "./model.js";
-
+import type { TagValue } from './model.js';
 
 /**
  * Flattens nested tag structures into a sorted array of strings.
- * 
+ *
  * Example
  * ---
- * 
+ *
  * Given the following nested tag structure:
- * 
+ *
  * ```
  * tags = {
  *  "category": {
@@ -23,12 +22,12 @@ import type { TagValue } from "./model.js";
  *  }
  * }
  * ```
- * 
+ *
  * The function will return:
  * `["category/science", "category/math/algebra"]`
- * 
+ *
  * @param value tags record with nested structures
- * @returns 
+ * @returns
  */
 export function flattenTags(value: Record<string, TagValue>): string[] {
   const result = new Set<string>();
@@ -39,12 +38,12 @@ export function flattenTags(value: Record<string, TagValue>): string[] {
       return;
     }
 
-    if (current !== null && typeof current === "object") {
+    if (current !== null && typeof current === 'object') {
       for (const [key, child] of Object.entries(current)) visit([...path, key], child);
       return;
     }
 
-    const prefix = path.join("/");
+    const prefix = path.join('/');
     if (current === true) {
       result.add(prefix);
       return;
@@ -52,11 +51,7 @@ export function flattenTags(value: Record<string, TagValue>): string[] {
     if (current === false) {
       return;
     }
-    result.add(
-      typeof current === "string"
-        ? `${prefix}/${current}`
-        : `${prefix}=${String(current)}`,
-    );
+    result.add(typeof current === 'string' ? `${prefix}/${current}` : `${prefix}=${String(current)}`);
   }
 
   for (const [key, child] of Object.entries(value)) visit([key], child);

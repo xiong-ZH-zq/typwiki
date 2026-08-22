@@ -1,17 +1,16 @@
-import { readdir } from "node:fs/promises";
-import { join } from "node:path";
-
+import { readdir } from 'node:fs/promises';
+import { join } from 'node:path';
 
 /**
  * Discovers all .typ files in the specified pages directory.
  * @param root root directory of the Typwiki project
  * @param pagesDir pages directory relative to the root
  * @returns A promise resolving to an array of file paths
- * 
+ *
  * Example:
- * 
+ *
  * Returns an array like:
- * 
+ *
  * ```
  * [
  * "/home/user/typwiki/pages/index.typ",
@@ -30,7 +29,7 @@ export async function discoverPages(root: string, pagesDir: string): Promise<str
       const path = join(directory, entry.name);
       if (entry.isDirectory()) {
         await visit(path);
-      } else if (entry.isFile() && entry.name.endsWith(".typ")) {
+      } else if (entry.isFile() && entry.name.endsWith('.typ')) {
         files.push(path);
       }
     }
@@ -46,14 +45,13 @@ export async function discoverPages(root: string, pagesDir: string): Promise<str
   return files.sort();
 }
 
-
 /**
- * 
+ *
  * @param error unknown error
  * @returns true if the error is a NodeJS.ErrnoException with code "ENOENT", indicating a missing directory
- * 
+ *
  * The function checks if the provided error is a `NodeJS.ErrnoException` with the code `"ENOENT"`,
  */
 function isMissingDirectory(error: unknown): error is NodeJS.ErrnoException {
-  return Boolean(error && typeof error === "object" && "code" in error && error.code === "ENOENT");
+  return Boolean(error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT');
 }

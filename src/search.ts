@@ -4,8 +4,8 @@
 // rendered article text and produces a small JSON-serializable structure that
 // the client script can fetch and filter without a server.
 
-import type { SiteIndex } from "./model.js";
-import { pageHref } from "./routing.js";
+import type { SiteIndex } from './model.js';
+import { pageHref } from './routing.js';
 
 /** A single page's entry in the static search index. */
 export interface SearchIndexPage {
@@ -42,13 +42,13 @@ export interface SearchIndex {
  */
 export function extractText(html: string): string {
   return html
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    .replace(/\s+/g, " ")
+    .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase();
 }
@@ -76,7 +76,7 @@ export function buildSearchIndex(index: SiteIndex, texts: Record<string, string>
       title: page.title,
       href: pageHref(index.baseUrl, index.routing, page.id),
       tags: page.tags,
-      text: texts[page.id] ?? "",
+      text: texts[page.id] ?? '',
     })),
   };
 }
