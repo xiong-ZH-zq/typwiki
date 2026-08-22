@@ -86,6 +86,27 @@
   content
 }
 
+// Display equations get a visible number in HTML output. Typst's HTML export
+// does not render equation numbers yet, so we wrap display equations in a
+// container and emit the counter value ourselves. References (typwiki-refs)
+// read the same counter, so the numbers always match.
+#let typwiki-equations(content) = {
+  show math.equation.where(block: true): it => context {
+    let num = counter(math.equation).display(it.numbering)
+    if target() == "html" {
+      html.elem(
+        "div",
+        attrs: (class: "typwiki-equation"),
+        html.elem("span", attrs: (class: "typwiki-equation-number"), num) + it,
+      )
+    } else {
+      it
+    }
+  }
+
+  content
+}
+
 // The page macro defines a page with a given body, id, title, and table options.
 //
 // `tag-table` and `link-table` are recorded in page metadata; the shell renders
@@ -95,6 +116,7 @@
   #set document(title: title)
 
   #show: typwiki-refs
+  #show: typwiki-equations
 
   #metadata((
     kind: "page",

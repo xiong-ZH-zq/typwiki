@@ -624,6 +624,29 @@
   .typwiki-article figure {
     margin: 1.5rem 0;
   }
+  .typwiki-article .typwiki-equation {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    margin: 1.5rem 0;
+  }
+  .typwiki-article .typwiki-equation > math {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: center;
+  }
+  .typwiki-article .typwiki-equation > p {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+    text-align: right;
+  }
+  .typwiki-article .typwiki-equation-number {
+    color: var(--color-muted);
+    font-size: 0.9em;
+    padding-left: 1rem;
+    white-space: nowrap;
+  }
   .typwiki-article section[role="doc-bibliography"],
   .typwiki-article section[role="doc-endnotes"] {
     margin-top: 3rem;
