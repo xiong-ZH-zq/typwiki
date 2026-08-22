@@ -31,12 +31,20 @@ export interface TypwikiConfig {
 
 export const config: TypwikiConfig = {
   root: resolve(import.meta.dirname),
+
+  // Directories for pages
   pagesDir: 'pages',
+
+  // Directories for your typst template file.
   libDir: 'lib',
   generatedDir: '.typwiki/generated',
   publicDir: 'public',
   baseUrl: process.env.TYPWIKI_BASE_URL ?? '',
+  
+  // Homepage ID
   homePageId: 'home',
+
+  // Theme configuration, you can customize this to use your own theme.
   theme: 'academic-paper',
   routing: {
     pagePrefix: '/p',
@@ -45,7 +53,7 @@ export const config: TypwikiConfig = {
   typstBin: process.env.TYPST_BIN ?? 'typst',
   port: Number(process.env.PORT ?? 4173),
 
-  // Header navigation cofiguration
+  // Header navigation configuration
   // Use `id` to link to a page in wiki, `href` to link to an external URL.
   navigation: [
     { id: 'home', label: 'Home' },

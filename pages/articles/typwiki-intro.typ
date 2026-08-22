@@ -27,7 +27,7 @@ Here we'll test how Typst features are supported in Typwiki.
 
 === Inline Formats
 
-Firstly, inline formats are supported well. we can use *bold* and _italic_ text, as well as `inline code`. #highlight("Highlight") is also supported. What about colors? Sadly, Typwiki does not support colors yet because Typst HTML output is still experimental. And color style is not yet implemented in HTML files. But we can use emojis! 🎉
+Firstly, inline formats are supported well. we can use *bold* and _italic_ text, as well as `inline code`. #highlight("Highlight") is also supported. What about colors? Typst support colors but it needs special #html.elem("span", attrs: (style: "color: red;"))[experimental] methods. You can use `#html.elem("span", attrs: (style: "color: red;"))` but it only works in HTML output (not PDF). Also we can use emojis! 🎉
 
 === Code Blocks
 
