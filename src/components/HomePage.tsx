@@ -11,19 +11,17 @@ export interface HomePageProps {
 
 export function HomePage({ index }: HomePageProps) {
   return (
-    <div id="typwiki-root">
-      <main id="typwiki-main" data-typwiki-region="main">
-        <article className="typwiki-article">
-          <h1>Typwiki</h1>
-          <ul>
-            {index.pages.map((page) => (
-              <li key={page.id}>
-                <a href={pageHref(index.baseUrl, index.routing, page.id)}>{page.title}</a> <code>{page.id}</code>
-              </li>
-            ))}
-          </ul>
-        </article>
-      </main>
-    </div>
+    <main id="typwiki-main" data-typwiki-region="main">
+      <article className="typwiki-article">
+        <h1>Typwiki</h1>
+        <ul>
+          {index.pages.map((page) => (
+            <li key={page.id}>
+              <a href={pageHref(index.baseUrl, index.routing, page.id)}>{page.title}</a> <code>{page.id}</code>
+            </li>
+          ))}
+        </ul>
+      </article>
+    </main>
   );
 }

@@ -19,8 +19,10 @@ import { escapeHtml } from './html.js';
 
 /** The site-wide asset hrefs and script references used by generated pages. */
 export interface SiteAssets {
-  /** The theme stylesheet href, e.g. `/assets/themes/academic-paper/theme.css`. */
-  stylesheet: string;
+  /** The base stylesheet (Tailwind + tokens), e.g. `/assets/styles.css`. */
+  styles: string;
+  /** The selected theme override layer, e.g. `/assets/themes/academic-paper/theme.css`. */
+  theme: string;
   /** The hydration bundle href, e.g. `/assets/client.js`; omitted until the client build exists. */
   clientScript?: string;
 }
@@ -118,10 +120,9 @@ export function renderArticlePage(html: string, options: { index: SiteIndex; pag
   return assembleDocument({
     title: page.title,
     head: document.head,
-    stylesheet: assets.stylesheet,
+    assets,
     bodyHtml: shellHtml,
     data,
-    clientScript: assets.clientScript,
   });
 }
 
@@ -138,39 +139,41 @@ export function renderHomePage(options: { index: Pick<SiteIndex, 'baseUrl' | 'ro
   return assembleDocument({
     title: 'Typwiki',
     head: '',
-    stylesheet: assets.stylesheet,
+    assets,
     bodyHtml,
     data: undefined,
-    clientScript: assets.clientScript,
   });
 }
 
 interface AssembleOptions {
   title: string;
   head: string;
-  stylesheet: string;
+  assets: SiteAssets;
   bodyHtml: string;
   /** Page data embedded for hydration; omitted on non-page documents. */
   data?: PageData;
-  clientScript?: string;
 }
 
 /** Wraps the rendered body shell in a standalone, deterministic HTML document. */
 function assembleDocument(options: AssembleOptions): string {
-  const { title, head, stylesheet, bodyHtml, data, clientScript } = options;
+  const { title, head, assets, bodyHtml, data } = options;
+  const { styles, theme, clientScript } = assets;
   const dataScript = data === undefined ? '' : `\n<script type="application/json" id="typwiki-data">${escapeJson(data)}</script>`;
   const scriptTag = clientScript === undefined ? '' : `\n<script type="module" src="${escapeHtml(clientScript)}"></script>`;
+  const styleLinks = `<link rel="stylesheet" href="${escapeHtml(styles)}"><link rel="stylesheet" href="${escapeHtml(theme)}">`;
   return `<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)} · Typwiki</title>
-${head}<link rel="stylesheet" href="${escapeHtml(stylesheet)}">
+${head}${styleLinks}
 ${dataScript}
 </head>
 <body>
+<div id="typwiki-root">
 ${bodyHtml}
+</div>
 ${scriptTag}
 </body>
 </html>`;

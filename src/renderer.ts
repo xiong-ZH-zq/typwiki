@@ -17,7 +17,8 @@ export async function renderSite(config: TypwikiConfig, index: SiteIndex): Promi
   const homePage = config.homePageId === undefined ? undefined : resolveHomePage(index, config.homePageId);
   await publishTheme(config.root, config.publicDir, config.theme);
   const assets: SiteAssets = {
-    stylesheet: themeStylesheetHref(index.baseUrl, config.theme),
+    styles: `${index.baseUrl}/assets/styles.css`,
+    theme: themeStylesheetHref(index.baseUrl, config.theme),
     clientScript: `${index.baseUrl}/assets/client.js`,
   };
 

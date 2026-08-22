@@ -1,5 +1,5 @@
-import { resolve } from "node:path";
-import type { NavigationEntry } from "./src/model.js";
+import { resolve } from 'node:path';
+import type { NavigationEntry } from './src/model.js';
 
 export interface TypwikiConfig {
   root: string;
@@ -22,22 +22,22 @@ export interface TypwikiConfig {
 
 export const config: TypwikiConfig = {
   root: resolve(import.meta.dirname),
-  pagesDir: "pages",
-  libDir: "lib",
-  generatedDir: ".typwiki/generated",
-  publicDir: "public",
-  baseUrl: process.env.TYPWIKI_BASE_URL ?? "",
-  homePageId: "home",
-  theme: "academic-paper",
+  pagesDir: 'pages',
+  libDir: 'lib',
+  generatedDir: '.typwiki/generated',
+  publicDir: 'public',
+  baseUrl: process.env.TYPWIKI_BASE_URL ?? '',
+  homePageId: 'home',
+  theme: 'academic-paper',
   routing: {
-    pagePrefix: "/p",
-    reservedPaths: ["/assets"],
+    pagePrefix: '/p',
+    reservedPaths: ['/assets'],
   },
-  typstBin: process.env.TYPST_BIN ?? "typst",
+  typstBin: process.env.TYPST_BIN ?? 'typst',
   port: Number(process.env.PORT ?? 4173),
   navigation: [
-    { id: "home", label: "Home" },
-    { id: "typwiki-intro", label: "Introduction" },
-    { href: "https://github.com/xzqbear/typwiki", label: "GitHub" },
+    { id: 'home', label: 'Home' },
+    { id: 'typwiki-intro', label: 'Introduction' },
+    { href: 'https://github.com/xzqbear/typwiki', label: 'GitHub' },
   ],
 };

@@ -5,6 +5,7 @@
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { TypwikiConfig } from '../typwiki.config.js';
+import { buildClientAssets } from './build/vite.js';
 import { discoverPages } from './discovery.js';
 import { buildSiteIndex } from './graph.js';
 import { writeSiteIndex } from './index-writer.js';
@@ -26,6 +27,7 @@ export async function checkSite(config: TypwikiConfig): Promise<SiteCheckResult>
 export async function buildSite(config: TypwikiConfig): Promise<SiteCheckResult> {
   const indexPath = join(config.root, config.generatedDir, 'site-index.json');
   const result = await checkSite(config);
+  await buildClientAssets(config.root);
   await writeSiteIndex(indexPath, result.index);
   await renderSite(config, result.index);
   return result;

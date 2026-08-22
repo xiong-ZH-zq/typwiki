@@ -1,0 +1,489 @@
+@import "tailwindcss";
+
+/* Scan the React components for utility classes. */
+@source "../components";
+
+/*
+ * Typwiki design tokens
+ *
+ * These variables are the single source of truth for the built-in academic
+ * paper look. User themes (assets/themes/<id>/theme.css) override them on
+ * `:root` to re-skin the whole site without touching component code — the same
+ * pattern Docusaurus/Infima and MkDocs Material use.
+ *
+ * Tailwind turns each `--color-*` / `--font-*` into a utility (e.g.
+ * `text-accent`, `bg-paper`) that compiles to `var(...)`, so a theme override
+ * at runtime changes every consumer at once.
+ */
+
+@theme {
+  /* paper palette */
+  --color-paper: #f6f1e8;
+  --color-paper-raised: #fffdf8;
+  --color-ink: #252321;
+  --color-muted: #706a62;
+  --color-line: #d9d0c2;
+  --color-accent: #245b82;
+  --color-accent-strong: #163e5d;
+  --color-accent-soft: #e4eef4;
+  --color-code: #eee9df;
+  --color-math-heading: #1c3d55;
+
+  /* typography */
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  /* paper shadow */
+  --shadow-paper: 0 12px 30px rgba(66, 52, 34, 0.08);
+}
+
+/* Dark mode: Tailwind's `.dark` class redefines the tokens. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  .dark {
+    color-scheme: dark;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    background: var(--color-paper);
+  }
+
+  body {
+    margin: 0;
+    color: var(--color-ink);
+    background: var(--color-paper);
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    line-height: 1.78;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------------------------------------------------------------- header */
+@layer components {
+  .typwiki-skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    z-index: 100;
+    padding: 0.6rem 1rem;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: 4px;
+  }
+  .typwiki-skip-link:focus {
+    top: 1rem;
+  }
+
+  [data-typwiki-region="header"] {
+    background: var(--color-paper-raised);
+    border-bottom: 1px solid var(--color-line);
+    box-shadow: var(--shadow-paper);
+  }
+  [data-typwiki-region="navigation"] {
+    max-width: 90rem;
+    margin: 0 auto;
+    padding: 0.85rem 2rem;
+  }
+  [data-typwiki-region="navigation"] ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 1.5rem;
+  }
+  .typwiki-nav-group {
+    color: var(--color-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .typwiki-nav-link {
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .typwiki-nav-link:hover {
+    color: var(--color-accent-strong);
+    text-decoration: underline;
+  }
+  .typwiki-nav-link.is-active {
+    color: var(--color-ink);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  /* breadcrumbs */
+  .typwiki-breadcrumbs {
+    max-width: 90rem;
+    margin: 0 auto;
+    padding: 1.1rem 2rem 0;
+  }
+  .typwiki-breadcrumbs ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+  }
+  .typwiki-breadcrumbs li + li::before {
+    content: "›";
+    margin-right: 0.45rem;
+    color: var(--color-line);
+  }
+
+  /* main layout */
+  #typwiki-main {
+    display: grid;
+    grid-template-columns: minmax(12rem, 17rem) minmax(0, 1fr);
+    gap: 0 3rem;
+    max-width: 90rem;
+    margin: 0 auto;
+    padding: 1.5rem 2rem 0;
+    align-items: start;
+  }
+  [data-typwiki-region="toc"] {
+    position: sticky;
+    top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    overflow: auto;
+    font-size: 0.92rem;
+  }
+  [data-typwiki-region="toc"] ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  [data-typwiki-region="toc"] ol ol {
+    padding-left: 1rem;
+    border-left: 1px solid var(--color-line);
+  }
+  [data-typwiki-region="toc"] li {
+    margin: 0.22rem 0;
+  }
+  [data-typwiki-region="toc"] a {
+    color: var(--color-muted);
+    text-decoration: none;
+  }
+  [data-typwiki-region="toc"] a:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+  [data-typwiki-region="footnotes"] {
+    grid-column: 2;
+  }
+  [data-typwiki-region="footnotes"]:empty {
+    display: none;
+  }
+  .typwiki-article {
+    max-width: 52rem;
+    min-width: 0;
+  }
+
+  /* relations */
+  [data-typwiki-region="relations"] {
+    max-width: 90rem;
+    margin: 2.5rem auto 0;
+    padding: 2rem 2rem 2.5rem;
+    border-top: 1px solid var(--color-line);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1.5rem 2.5rem;
+    align-items: start;
+  }
+  .typwiki-properties,
+  .typwiki-page-tags,
+  .typwiki-link-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .typwiki-properties li {
+    margin: 0.15rem 0;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+  }
+  .typwiki-properties li span {
+    margin-right: 0.4rem;
+    font-weight: 600;
+  }
+  .typwiki-properties time {
+    color: var(--color-ink);
+  }
+  .typwiki-page-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .typwiki-tag {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    border-radius: 999px;
+    padding: 0.12rem 0.6rem;
+    font-size: 0.82rem;
+  }
+  .typwiki-link-list-title {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .typwiki-link-list li {
+    margin: 0.18rem 0;
+  }
+  .typwiki-missing-link {
+    color: var(--color-muted);
+    text-decoration: line-through;
+  }
+
+  /* footer */
+  [data-typwiki-region="footer"] {
+    margin-top: 2rem;
+    padding: 1.4rem 2rem;
+    border-top: 1px solid var(--color-line);
+    background: var(--color-paper-raised);
+    color: var(--color-muted);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  [data-typwiki-region="footer"] p {
+    margin: 0;
+  }
+
+  /* narrow screens */
+  @media (max-width: 56rem) {
+    #typwiki-main {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      padding-top: 1.5rem;
+    }
+    [data-typwiki-region="toc"] {
+      position: static;
+      max-height: none;
+      border-bottom: 1px solid var(--color-line);
+      padding-bottom: 1rem;
+    }
+    [data-typwiki-region="toc"]::before {
+      content: "On this page";
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    [data-typwiki-region="footnotes"] {
+      grid-column: 1;
+    }
+  }
+  @media (max-width: 38rem) {
+    body {
+      font-size: 1rem;
+    }
+    [data-typwiki-region="navigation"],
+    .typwiki-breadcrumbs,
+    #typwiki-main,
+    [data-typwiki-region="relations"],
+    [data-typwiki-region="footer"] {
+      padding-left: 1.1rem;
+      padding-right: 1.1rem;
+    }
+    [data-typwiki-region="navigation"] {
+      padding-top: 0.7rem;
+      padding-bottom: 0.7rem;
+    }
+    [data-typwiki-region="relations"] {
+      grid-template-columns: 1fr;
+      gap: 1.2rem;
+    }
+  }
+}
+
+/* ---------------------------------------------------------- article body */
+@layer base {
+  .typwiki-article h1,
+  .typwiki-article h2,
+  .typwiki-article h3,
+  .typwiki-article h4,
+  .typwiki-article h5,
+  .typwiki-article h6 {
+    color: var(--color-math-heading);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .typwiki-article h1 {
+    margin: 0 0 2.5rem;
+    font-size: clamp(2rem, 5vw, 3.1rem);
+  }
+  .typwiki-article h2 {
+    margin: 2.8rem 0 1rem;
+    font-size: 1.75rem;
+    border-bottom: 1px solid var(--color-line);
+    padding-bottom: 0.35rem;
+  }
+  .typwiki-article h3 {
+    margin: 2rem 0 0.7rem;
+    font-size: 1.35rem;
+  }
+  .typwiki-article h4 {
+    margin: 1.4rem 0 0.5rem;
+    font-size: 1.1rem;
+  }
+  .typwiki-article p {
+    margin: 0 0 1rem;
+  }
+  .typwiki-article a {
+    color: var(--color-accent);
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.16em;
+  }
+  .typwiki-article a:hover {
+    color: var(--color-accent-strong);
+  }
+  .typwiki-article ul,
+  .typwiki-article ol {
+    padding-left: 1.5rem;
+  }
+  .typwiki-article li::marker {
+    color: var(--color-accent);
+  }
+  .typwiki-article blockquote {
+    margin: 1.5rem 0;
+    padding: 0.7rem 1.2rem;
+    color: var(--color-muted);
+    border-left: 3px solid var(--color-accent);
+    background: #f2eee6;
+  }
+  .typwiki-article pre,
+  .typwiki-article code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+  }
+  .typwiki-article code {
+    padding: 0.12em 0.3em;
+    background: var(--color-code);
+    border-radius: 3px;
+  }
+  .typwiki-article pre {
+    overflow-x: auto;
+    margin: 1.3rem 0;
+    padding: 1.1rem 1.2rem;
+    color: #2f3540;
+    background: var(--color-code);
+    border: 1px solid var(--color-line);
+    border-radius: 5px;
+    line-height: 1.55;
+  }
+  .typwiki-article pre code {
+    padding: 0;
+    background: transparent;
+  }
+  .typwiki-article table {
+    width: 100%;
+    margin: 1.5rem 0;
+    border-collapse: collapse;
+    font-size: 0.95em;
+  }
+  .typwiki-article th,
+  .typwiki-article td {
+    padding: 0.65rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .typwiki-article th {
+    color: var(--color-math-heading);
+    background: var(--color-accent-soft);
+    font-weight: 600;
+  }
+  .typwiki-article tbody tr:nth-child(even) {
+    background: #fbf8f1;
+  }
+  .typwiki-article .typwiki-environment {
+    margin: 1.6rem 0;
+    padding: 1rem 1.2rem 1.1rem;
+    background: #f8f5ee;
+    border: 1px solid var(--color-line);
+    border-left: 4px solid var(--color-accent);
+    border-radius: 4px;
+  }
+  .typwiki-article .typwiki-environment p:last-child {
+    margin-bottom: 0;
+  }
+  .typwiki-article figure {
+    margin: 1.5rem 0;
+  }
+  .typwiki-article section[role="doc-bibliography"],
+  .typwiki-article section[role="doc-endnotes"] {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-line);
+  }
+}
+
+/* ------------------------------------------------------- dark scheme */
+@layer base {
+  .dark {
+    --color-paper: #1f2428;
+    --color-paper-raised: #252b30;
+    --color-ink: #e8e3da;
+    --color-muted: #b6afa4;
+    --color-line: #4b5359;
+    --color-accent: #91c6e7;
+    --color-accent-strong: #c9e2f1;
+    --color-accent-soft: #304451;
+    --color-code: #30373b;
+    --color-math-heading: #c9e2f1;
+    --shadow-paper: none;
+  }
+  .dark html {
+    background: var(--color-paper-raised);
+  }
+  .dark .typwiki-article blockquote,
+  .dark .typwiki-article tbody tr:nth-child(even),
+  .dark .typwiki-article .typwiki-environment {
+    background: #2b3237;
+  }
+  .dark .typwiki-article pre {
+    color: #e8e3da;
+  }
+  .dark .typwiki-nav-link.is-active {
+    color: var(--color-ink);
+  }
+  .dark .typwiki-properties time,
+  .dark .typwiki-missing-link {
+    color: var(--color-ink);
+  }
+}
+
+/* ------------------------------------------------------- reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

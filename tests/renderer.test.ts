@@ -22,7 +22,10 @@ const index = (baseUrl: string): SiteIndex => ({
   tags: {},
 });
 
-const assets = { stylesheet: '/assets/themes/academic-paper/theme.css' };
+const assets = {
+  styles: '/assets/styles.css',
+  theme: '/assets/themes/academic-paper/theme.css',
+};
 
 describe('extractTypstDocument', () => {
   it('extracts head and body while dropping the original title', () => {
@@ -63,7 +66,8 @@ describe('renderArticlePage', () => {
 
     expect(wrapped).toContain('<article class="typwiki-article" data-page-id="note"><p>Body</p></article>');
     expect(wrapped).toContain('<style>.m{}</style>');
-    expect(wrapped).toContain(assets.stylesheet);
+    expect(wrapped).toContain(assets.styles);
+    expect(wrapped).toContain(assets.theme);
     expect(wrapped).toContain('data-typwiki-region="navigation"');
     expect(wrapped).toContain('data-typwiki-region="relations"');
   });

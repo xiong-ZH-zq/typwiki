@@ -39,7 +39,7 @@ export function Shell({ index, content, currentPageId, headings, tagTable, linkT
   const articleId = isPage ? currentPageId : undefined;
 
   return (
-    <div id="typwiki-root">
+    <>
       <a className="typwiki-skip-link" href="#typwiki-main">
         Skip to content
       </a>
@@ -65,6 +65,6 @@ export function Shell({ index, content, currentPageId, headings, tagTable, linkT
       <footer data-typwiki-region="footer">
         <Footer index={index} />
       </footer>
-    </div>
+    </>
   );
 }

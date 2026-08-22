@@ -275,7 +275,6 @@ describe('Shell', () => {
     const html = renderToStaticMarkup(
       <Shell index={index([page({ id: 'note', title: 'Note' })])} content="<p>Body</p>" currentPageId="note" />,
     );
-    expect(html).toContain('id="typwiki-root"');
     expect(html).toContain('data-typwiki-region="header"');
     expect(html).toContain('data-typwiki-region="main"');
     expect(html).toContain('data-typwiki-region="relations"');
