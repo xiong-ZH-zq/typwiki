@@ -14,6 +14,7 @@ import { buildSearchIndex } from './build/search-index.js';
 import type { SiteIndex, SitePage } from './model.js';
 import { TypwikiError } from './model.js';
 import { pageOutputPath } from './routing.js';
+import { typstInputArgs } from './typst-adapter.js';
 
 export async function renderSite(config: TypwikiConfig, index: SiteIndex): Promise<void> {
   const homePage = config.homePageId === undefined ? undefined : resolveHomePage(index, config.homePageId);
@@ -24,12 +25,15 @@ export async function renderSite(config: TypwikiConfig, index: SiteIndex): Promi
     clientScript: `${index.baseUrl}/assets/client.js`,
   };
 
+  const knownIds = index.pages.map((page) => page.id);
+  const inputs = typstInputArgs({ baseUrl: index.baseUrl, pagePrefix: index.routing.pagePrefix, known: knownIds });
+
   const texts: Record<string, string> = {};
   for (const page of index.pages) {
     const input = join(config.root, page.file);
     const output = pageOutputPath(config.root, config.publicDir, index.routing, page.id);
     await mkdir(dirname(output), { recursive: true });
-    const result = await run(config.typstBin, ['compile', '--features', 'html', '--root', config.root, input, output]);
+    const result = await run(config.typstBin, ['compile', '--features', 'html', '--root', config.root, ...inputs, input, output]);
     if (result.exitCode !== 0) {
       throw new TypwikiError([{ file: page.file, message: result.stderr.trim() || 'Typst HTML compilation failed.' }]);
     }

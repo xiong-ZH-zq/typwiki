@@ -42,6 +42,28 @@ const tagsSchema = z.object({
 export interface TypstAdapterOptions {
   root: string;
   typstBin: string;
+  baseUrl: string;
+  pagePrefix: string;
+}
+
+/**
+ * Builds the `--input` arguments passed to Typst so `lib/typwiki.typ` can
+ * resolve page URLs and known-page checks without reading a generated JSON
+ * file. `known` is the comma-separated set of site page ids (empty during
+ * metadata extraction, full during rendering).
+ *
+ * @param options The site's base URL, page prefix, and known page ids.
+ * @returns An array of `--input key=value` CLI arguments.
+ */
+export function typstInputArgs(options: { baseUrl: string; pagePrefix: string; known: string[] }): string[] {
+  return [
+    '--input',
+    `typwiki-known=${options.known.join(',')}`,
+    '--input',
+    `typwiki-base-url=${options.baseUrl}`,
+    '--input',
+    `typwiki-page-prefix=${options.pagePrefix}`,
+  ];
 }
 
 /**
@@ -106,6 +128,7 @@ export class TypstAdapter {
       'html',
       '--root',
       this.options.root,
+      ...typstInputArgs({ baseUrl: this.options.baseUrl, pagePrefix: this.options.pagePrefix, known: [] }),
       '--in',
       file,
       expression,

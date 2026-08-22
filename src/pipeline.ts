@@ -2,7 +2,6 @@
 // This module provides the core pipeline for building and checking a Typwiki site.
 // It includes functions to check the site for errors, build the site index, and render the site.
 
-import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { TypwikiConfig } from '../typwiki.config.js';
 import { buildClientAssets } from './build/vite.js';
@@ -15,11 +14,12 @@ import { normalizeBaseUrl, normalizeRouting } from './routing.js';
 import { TypstAdapter } from './typst-adapter.js';
 
 export async function checkSite(config: TypwikiConfig): Promise<SiteCheckResult> {
-  await ensureSeedIndex(config);
   const files = await discoverPages(config.root, config.pagesDir);
-  const adapter = new TypstAdapter({ root: config.root, typstBin: config.typstBin });
+  const routing = normalizeRouting(config.routing);
+  const baseUrl = normalizeBaseUrl(config.baseUrl);
+  const adapter = new TypstAdapter({ root: config.root, typstBin: config.typstBin, baseUrl, pagePrefix: routing.pagePrefix });
   const pages = await Promise.all(files.map((file) => adapter.parsePage(file)));
-  const index = buildSiteIndex(pages, normalizeRouting(config.routing), normalizeBaseUrl(config.baseUrl), config.navigation);
+  const index = buildSiteIndex(pages, routing, baseUrl, config.navigation);
   if (config.homePageId !== undefined) resolveHomePage(index.index, config.homePageId);
   return index;
 }
@@ -31,17 +31,4 @@ export async function buildSite(config: TypwikiConfig): Promise<SiteCheckResult>
   await writeSiteIndex(indexPath, result.index);
   await renderSite(config, result.index);
   return result;
-}
-
-async function ensureSeedIndex(config: TypwikiConfig): Promise<void> {
-  const indexPath = join(config.root, config.generatedDir, 'site-index.json');
-  await mkdir(join(config.root, config.generatedDir), { recursive: true });
-  await writeSiteIndex(indexPath, {
-    version: 3,
-    baseUrl: normalizeBaseUrl(config.baseUrl),
-    routing: normalizeRouting(config.routing),
-    pages: [],
-    tags: {},
-    ...(config.navigation === undefined ? {} : { navigation: config.navigation }),
-  });
 }
