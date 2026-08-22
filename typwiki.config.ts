@@ -20,6 +20,15 @@ export interface TypwikiConfig {
   port: number;
 }
 
+/**
+ * For users:
+ * 
+ * You can modify this configuration file to customize the behavior of Typwiki. 
+ * The configuration options include paths for pages, libraries, generated files, 
+ * and public assets, as well as settings for routing, navigation, and the Typst binary. 
+ * Adjust these settings according to your project's needs.
+ */
+
 export const config: TypwikiConfig = {
   root: resolve(import.meta.dirname),
   pagesDir: 'pages',
@@ -35,9 +44,12 @@ export const config: TypwikiConfig = {
   },
   typstBin: process.env.TYPST_BIN ?? 'typst',
   port: Number(process.env.PORT ?? 4173),
+
+  // Header navigation cofiguration
+  // Use `id` to link to a page in wiki, `href` to link to an external URL.
   navigation: [
     { id: 'home', label: 'Home' },
     { id: 'typwiki-intro', label: 'Introduction' },
-    { href: 'https://github.com/xzqbear/typwiki', label: 'GitHub' },
+    { href: 'https://github.com/xiong-zh-zq/typwiki', label: 'GitHub' },
   ],
 };
