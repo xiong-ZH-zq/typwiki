@@ -3,8 +3,11 @@
 // It includes functions to normalize routing configurations, generate page URLs and output paths, and validate page routes.
 
 import { relative, resolve, sep } from 'node:path';
+import { normalizeBaseUrl, pageHref, pageUrlPath } from './build/links.js';
 import type { Diagnostic, ParsedPage, RoutingConfig } from './model.js';
 import { TypwikiError } from './model.js';
+
+export { normalizeBaseUrl, pageHref, pageUrlPath };
 
 const SYSTEM_RESERVED_PATHS = ['/', '/__typwiki'];
 
@@ -22,19 +25,6 @@ export function normalizeRouting(routing: RoutingConfig): RoutingConfig {
   }
 
   return { pagePrefix, reservedPaths };
-}
-
-export function normalizeBaseUrl(baseUrl: string): string {
-  if (baseUrl === '' || baseUrl === '/') return '';
-  return normalizePath(baseUrl, 'Base URL');
-}
-
-export function pageUrlPath(routing: RoutingConfig, id: string): string {
-  return `${routing.pagePrefix}/${id}/`;
-}
-
-export function pageHref(baseUrl: string, routing: RoutingConfig, id: string): string {
-  return `${normalizeBaseUrl(baseUrl)}${pageUrlPath(routing, id)}`;
 }
 
 export function pageOutputPath(root: string, publicDir: string, routing: RoutingConfig, id: string): string {

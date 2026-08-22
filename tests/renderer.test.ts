@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { extractTypstDocument, renderArticlePage } from '../src/build/render-site.js';
 import { type SiteIndex, TypwikiError } from '../src/model.js';
-import { extractTypstDocument, resolveHomePage, wrapTypstHtml } from '../src/renderer.js';
+import { resolveHomePage } from '../src/renderer.js';
 
 const index = (baseUrl: string): SiteIndex => ({
   version: 3,
@@ -21,7 +22,7 @@ const index = (baseUrl: string): SiteIndex => ({
   tags: {},
 });
 
-const stylesheet = '/assets/themes/academic-paper/theme.css';
+const assets = { stylesheet: '/assets/themes/academic-paper/theme.css' };
 
 describe('extractTypstDocument', () => {
   it('extracts head and body while dropping the original title', () => {
@@ -55,26 +56,35 @@ describe('extractTypstDocument', () => {
   });
 });
 
-describe('wrapTypstHtml', () => {
+describe('renderArticlePage', () => {
   it('wraps the Typst body in the site shell and preserves head styles', () => {
     const html = '<!DOCTYPE html><html><head><title>A &lt;note&gt;</title><style>.m{}</style></head><body><p>Body</p></body></html>';
-    const wrapped = wrapTypstHtml(html, { index: index(''), page: index('').pages[0], stylesheet });
+    const wrapped = renderArticlePage(html, { index: index(''), page: index('').pages[0], assets });
 
     expect(wrapped).toContain('<article class="typwiki-article" data-page-id="note"><p>Body</p></article>');
     expect(wrapped).toContain('<style>.m{}</style>');
-    expect(wrapped).toContain(stylesheet);
+    expect(wrapped).toContain(assets.stylesheet);
     expect(wrapped).toContain('data-typwiki-region="navigation"');
     expect(wrapped).toContain('data-typwiki-region="relations"');
   });
 
   it('anchors headings and excludes the page title heading from the TOC', () => {
     const html = '<!DOCTYPE html><html><head><title>Note</title></head><body><h2>Note</h2><h3>Details</h3><p>Body</p></body></html>';
-    const wrapped = wrapTypstHtml(html, { index: index(''), page: index('').pages[0], stylesheet });
+    const wrapped = renderArticlePage(html, { index: index(''), page: index('').pages[0], assets });
 
     expect(wrapped).toContain('<h2 id="note">Note</h2>');
     expect(wrapped).toContain('<h3 id="details">Details</h3>');
     expect(wrapped).toContain('<a href="#details">Details</a>');
     expect(wrapped).not.toContain('<a href="#note">');
+  });
+
+  it('embeds the page data as JSON for the hydrated client', () => {
+    const html = '<!DOCTYPE html><html><head><title>Note</title></head><body><h1>Note</h1><p>Body</p></body></html>';
+    const wrapped = renderArticlePage(html, { index: index('/typwiki'), page: index('/typwiki').pages[0], assets });
+
+    expect(wrapped).toContain('<script type="application/json" id="typwiki-data">');
+    expect(wrapped).toContain('"pageId":"note"');
+    expect(wrapped).toContain('"baseUrl":"/typwiki"');
   });
 });
 
