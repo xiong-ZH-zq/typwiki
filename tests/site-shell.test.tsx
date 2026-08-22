@@ -7,14 +7,7 @@ import { Breadcrumbs } from '../src/components/Breadcrumbs.js';
 import { Footer } from '../src/components/Footer.js';
 import { Header } from '../src/components/Header.js';
 import { buildNavigationTree, Navigation, type NavNode } from '../src/components/Navigation.js';
-import {
-  findRelatedPages,
-  formatModifiedDate,
-  PageLinkList,
-  PageTags,
-  Properties,
-  RelationsPanel,
-} from '../src/components/RelationsPanel.js';
+import { formatModifiedDate, PageLinkList, PageTags, Properties, RelationsPanel } from '../src/components/RelationsPanel.js';
 import { Shell } from '../src/components/Shell.js';
 import { TableOfContents } from '../src/components/TableOfContents.js';
 import type { NavigationEntry, SiteIndex, SitePage } from '../src/model.js';
@@ -138,52 +131,44 @@ describe('Properties', () => {
 });
 
 describe('PageTags', () => {
-  it('renders page tags as chips and hides the empty section', () => {
+  it('renders page tags as chips and a None placeholder for the empty column', () => {
     const html = renderToStaticMarkup(<PageTags page={page({ id: 'note', tags: ['topic/math'] })} />);
     expect(html).toContain('<span class="typwiki-tag">topic/math</span>');
-    expect(renderToStaticMarkup(<PageTags page={page({ id: 'note', tags: [] })} />)).toBe('');
+    expect(renderToStaticMarkup(<PageTags page={page({ id: 'note', tags: [] })} />)).toContain('None');
   });
 });
 
 describe('PageLinkList', () => {
   it('links known targets and degrades unknown targets to text', () => {
-    const html = renderToStaticMarkup(
-      <PageLinkList title="Backlinks" ids={['known', 'missing']} index={index([page({ id: 'known', title: 'Known' })])} />,
-    );
-    expect(html).toContain('<h3 class="typwiki-link-list-title">Backlinks</h3>');
+    const html = renderToStaticMarkup(<PageLinkList ids={['known', 'missing']} index={index([page({ id: 'known', title: 'Known' })])} />);
     expect(html).toContain('<a href="/p/known/">Known</a>');
     expect(html).toContain('<span class="typwiki-missing-link">missing</span>');
   });
 
-  it('renders nothing for an empty list', () => {
-    expect(renderToStaticMarkup(<PageLinkList title="Backlinks" ids={[]} index={index([])} />)).toBe('');
-  });
-});
-
-describe('findRelatedPages', () => {
-  it('orders pages by shared tag count and excludes the current page', () => {
-    const site = index([
-      page({ id: 'a', tags: ['topic/x', 'topic/y'] }),
-      page({ id: 'b', tags: ['topic/x'] }),
-      page({ id: 'c', tags: ['topic/z'] }),
-    ]);
-    expect(findRelatedPages(site, 'a').map((p) => p.id)).toEqual(['b']);
-  });
-
-  it('returns nothing for pages without tags', () => {
-    expect(findRelatedPages(index([page({ id: 'a', tags: [] })]), 'a')).toEqual([]);
+  it('renders a None placeholder for an empty list', () => {
+    expect(renderToStaticMarkup(<PageLinkList ids={[]} index={index([])} />)).toContain('None');
   });
 });
 
 describe('RelationsPanel', () => {
-  it('renders properties, tags, links, and related pages for a known page', () => {
+  it('renders the four stable columns with titles above content', () => {
     const site = index([page({ id: 'a', tags: ['topic/x'], outgoing: ['b'], backlinks: ['b'] }), page({ id: 'b', tags: ['topic/x'] })]);
     const html = renderToStaticMarkup(<RelationsPanel index={site} pageId="a" />);
+    expect(html).toContain('Properties');
+    expect(html).toContain('Tags');
+    expect(html).toContain('Backlinks');
+    expect(html).toContain('Outlinks');
     expect(html).toContain('Page ID');
     expect(html).toContain('topic/x');
-    expect(html).toContain('Outgoing links');
-    expect(html).toContain('Backlinks');
-    expect(html).toContain('Related pages');
+    expect(html).toContain('<a href="/p/b/">b</a>');
+    expect(html).not.toContain('Related pages');
+  });
+
+  it('keeps empty columns with a None placeholder', () => {
+    const site = index([page({ id: 'a', tags: [], outgoing: [], backlinks: [] })]);
+    const html = renderToStaticMarkup(<RelationsPanel index={site} pageId="a" />);
+    expect(html).toContain('<section class="typwiki-relations-column">');
+    expect(html.match(/typwiki-relations-none/g)).not.toBeNull();
   });
 
   it('renders nothing for an unknown page', () => {

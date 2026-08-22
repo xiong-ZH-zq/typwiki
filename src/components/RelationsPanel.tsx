@@ -1,7 +1,9 @@
 // RelationsPanel.tsx
-// Renders the relations region: page properties, tags, outgoing links,
-// backlinks, and related pages. It is controlled by the authored page flags
-// (`tagTable` / `linkTable`), so a section is omitted when its data is empty.
+// Renders the relations region as four stable columns — Properties (Page ID),
+// Tags, Backlinks, and Outlinks — each with its title on top and content
+// below. It is controlled by the authored page flags (`tagTable` /
+// `linkTable`); a column whose data is empty keeps its title and shows a
+// "None" placeholder so the four-column layout stays stable.
 
 import { pageHref } from '../build/links.js';
 import type { SiteIndex, SitePage } from '../model.js';
@@ -9,9 +11,9 @@ import type { SiteIndex, SitePage } from '../model.js';
 export interface RelationsPanelProps {
   index: SiteIndex;
   pageId: string;
-  /** Whether the authored page opted into the tag section. */
+  /** Whether the authored page opted into the tag column. */
   showTags?: boolean;
-  /** Whether the authored page opted into the link sections. */
+  /** Whether the authored page opted into the link columns. */
   showLinks?: boolean;
 }
 
@@ -19,18 +21,38 @@ export function RelationsPanel({ index, pageId, showTags = true, showLinks = tru
   const page = index.pages.find((candidate) => candidate.id === pageId);
   if (page === undefined) return null;
 
-  const parts: React.ReactNode[] = [];
-  parts.push(<Properties key="properties" page={page} />);
-  if (showTags) parts.push(<PageTags key="tags" page={page} />);
-  if (showLinks) {
-    parts.push(<PageLinkList key="outgoing" title="Outgoing links" ids={page.outgoing} index={index} />);
-    parts.push(<PageLinkList key="backlinks" title="Backlinks" ids={page.backlinks} index={index} />);
-  }
-  const related = findRelatedPages(index, pageId);
-  if (related.length > 0)
-    parts.push(<PageLinkList key="related" title="Related pages" ids={related.map((item) => item.id)} index={index} />);
+  return (
+    <>
+      <RelationsColumn title="Properties">
+        <Properties page={page} />
+      </RelationsColumn>
+      {showTags ? (
+        <RelationsColumn title="Tags">
+          <PageTags page={page} />
+        </RelationsColumn>
+      ) : null}
+      {showLinks ? (
+        <RelationsColumn title="Backlinks">
+          <PageLinkList ids={page.backlinks} index={index} />
+        </RelationsColumn>
+      ) : null}
+      {showLinks ? (
+        <RelationsColumn title="Outlinks">
+          <PageLinkList ids={page.outgoing} index={index} />
+        </RelationsColumn>
+      ) : null}
+    </>
+  );
+}
 
-  return <>{parts}</>;
+/** Wraps a relations column so the title and content share one grid cell. */
+function RelationsColumn({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="typwiki-relations-column">
+      <h3 className="typwiki-link-list-title">{title}</h3>
+      {children}
+    </section>
+  );
 }
 
 /** Renders a page's id and modification date as property rows. */
@@ -63,9 +85,9 @@ export function formatModifiedDate(page: SitePage): string | null {
   return new Date(page.modifiedAt).toISOString().slice(0, 10);
 }
 
-/** Renders a page's tags as a chip list. */
+/** Renders a page's tags as a chip list, or a "None" placeholder. */
 export function PageTags({ page }: { page: SitePage }) {
-  if (page.tags.length === 0) return null;
+  if (page.tags.length === 0) return <NonePlaceholder />;
   return (
     <ul className="typwiki-page-tags">
       {page.tags.map((tag) => (
@@ -78,49 +100,35 @@ export function PageTags({ page }: { page: SitePage }) {
 }
 
 /**
- * Renders a titled list of page links. Known targets link to their pages;
- * unknown targets degrade to a muted span instead of a broken link.
+ * Renders a list of page links. Known targets link to their pages; unknown
+ * targets degrade to a muted span instead of a broken link. An empty list
+ * renders a "None" placeholder so the parent column stays stable.
  */
-export function PageLinkList({ title, ids, index }: { title: string; ids: string[]; index: SiteIndex }) {
-  if (ids.length === 0) return null;
+export function PageLinkList({ ids, index }: { ids: string[]; index: SiteIndex }) {
+  if (ids.length === 0) return <NonePlaceholder />;
   const byId = new Map(index.pages.map((page) => [page.id, page]));
   return (
-    <>
-      <h3 className="typwiki-link-list-title">{title}</h3>
-      <ul className="typwiki-link-list">
-        {ids.map((id) => {
-          const page = byId.get(id);
-          if (page === undefined) {
-            return (
-              <li key={id}>
-                <span className="typwiki-missing-link">{id}</span>
-              </li>
-            );
-          }
+    <ul className="typwiki-link-list">
+      {ids.map((id) => {
+        const page = byId.get(id);
+        if (page === undefined) {
           return (
             <li key={id}>
-              <a href={pageHref(index.baseUrl, index.routing, page.id)}>{page.title}</a>
+              <span className="typwiki-missing-link">{id}</span>
             </li>
           );
-        })}
-      </ul>
-    </>
+        }
+        return (
+          <li key={id}>
+            <a href={pageHref(index.baseUrl, index.routing, page.id)}>{page.title}</a>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
-/**
- * Finds pages related to a page by counting shared tags, most related first.
- * @returns Pages sharing at least one tag, ordered by shared tag count descending
- *   then page id; `[]` for unknown or untagged pages.
- */
-export function findRelatedPages(index: SiteIndex, pageId: string): SitePage[] {
-  const current = index.pages.find((page) => page.id === pageId);
-  if (current === undefined || current.tags.length === 0) return [];
-  const currentTags = new Set(current.tags);
-  return index.pages
-    .filter((page) => page.id !== pageId)
-    .map((page) => ({ page, shared: page.tags.filter((tag) => currentTags.has(tag)).length }))
-    .filter((entry) => entry.shared > 0)
-    .sort((left, right) => right.shared - left.shared || left.page.id.localeCompare(right.page.id))
-    .map((entry) => entry.page);
+/** Muted "None" placeholder for an empty relations column. */
+function NonePlaceholder() {
+  return <p className="typwiki-relations-none">None</p>;
 }
