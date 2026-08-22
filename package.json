@@ -12,16 +12,31 @@
     "build": "tsx src/cli.ts build",
     "serve": "tsx src/cli.ts serve",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
   },
   "dependencies": {
     "@fastify/static": "^8.2.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^5.2.0",
     "chokidar": "^4.0.3",
     "fastify": "^5.4.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^4.3.3",
+    "vite": "^7.3.6",
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.10",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^22.15.30",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "jsdom": "^30.0.1",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
