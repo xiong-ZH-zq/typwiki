@@ -20,6 +20,10 @@ export default defineConfig({
   // `public/` is pipeline output, not a Vite public directory: copying it into
   // `outDir` would duplicate the generated pages under `public/assets/`.
   publicDir: false,
+  // Relative asset URLs: the CSS lives at `/assets/styles.css` and the fonts at
+  // `/assets/*.woff2`, so `url(./source-serif-4-*.woff2)` resolves correctly
+  // and also under a GitHub Pages sub-path (`/typwiki/assets/...`).
+  base: './',
   build: {
     outDir: 'public/assets',
     emptyOutDir: false,

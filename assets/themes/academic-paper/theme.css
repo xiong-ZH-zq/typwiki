@@ -15,11 +15,11 @@
 
 /* Theme-specific environment accents (kept outside the token system). */
 .typwiki-article [data-typwiki-kind='typwiki-Theorem'] {
-  border-left-color: #245b82;
+  border-left-color: #1750ba;
 }
 .typwiki-article [data-typwiki-kind='typwiki-Lemma'] {
-  border-left-color: #6b5b3e;
+  border-left-color: #0e8a6d;
 }
 .typwiki-article [data-typwiki-kind='typwiki-Definition'] {
-  border-left-color: #6d7b52;
+  border-left-color: #5b6b7a;
 }
