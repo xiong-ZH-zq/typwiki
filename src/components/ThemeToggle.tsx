@@ -1,8 +1,9 @@
 // ThemeToggle.tsx
 // Client-side color-scheme control. Offers `light`, `dark`, and `system`
-// choices, persists the choice in `localStorage`, and applies it by setting the
-// `data-theme` attribute on `<html>`. When JavaScript is unavailable, the CSS
-// `prefers-color-scheme` fallback in `styles.css` still honors the OS choice.
+// choices in a compact `<select>` dropdown, persists the choice in
+// `localStorage`, and applies it by setting the `data-theme` attribute on
+// `<html>`. When JavaScript is unavailable, the CSS `prefers-color-scheme`
+// fallback in `styles.css` still honors the OS choice.
 //
 // The component renders a neutral "system" state on the server and during the
 // first client render; the persisted choice is applied in an effect to keep
@@ -49,19 +50,17 @@ export function ThemeToggle() {
   };
 
   return (
-    <fieldset className="typwiki-theme-toggle">
-      <legend className="typwiki-theme-toggle-legend">Color scheme</legend>
+    <select
+      className="typwiki-theme-toggle-select"
+      value={theme}
+      aria-label="Color scheme"
+      onChange={(event) => select(event.target.value as ThemeChoice)}
+    >
       {CHOICES.map((choice) => (
-        <button
-          key={choice}
-          type="button"
-          className={`typwiki-theme-toggle-button${theme === choice ? ' is-active' : ''}`}
-          aria-pressed={theme === choice}
-          onClick={() => select(choice)}
-        >
+        <option key={choice} value={choice}>
           {LABELS[choice]}
-        </button>
+        </option>
       ))}
-    </fieldset>
+    </select>
   );
 }

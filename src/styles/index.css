@@ -238,44 +238,30 @@
     color: var(--color-muted);
     font-size: 0.78rem;
   }
-  .typwiki-theme-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    margin: 0;
-    padding: 0;
+  .typwiki-theme-toggle-select {
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--color-ink);
+    background-color: var(--color-paper);
     border: 1px solid var(--color-line);
     border-radius: 3px;
-    overflow: hidden;
-  }
-  .typwiki-theme-toggle-legend {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-  .typwiki-theme-toggle-button {
-    padding: 0.3rem 0.7rem;
-    font-family: inherit;
-    font-size: 0.82rem;
-    color: var(--color-muted);
-    background: var(--color-paper);
-    border: 0;
-    border-right: 1px solid var(--color-line);
+    padding: 0.35rem 1.7rem 0.35rem 0.7rem;
     cursor: pointer;
+    /* Replace the native arrow with an inline gray chevron so it matches the
+       flat academic look and adapts to the current text color. */
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.55rem center;
+    background-size: 0.7rem;
   }
-  .typwiki-theme-toggle-button:last-child {
-    border-right: 0;
+  .typwiki-theme-toggle-select:hover {
+    border-color: var(--color-accent);
   }
-  .typwiki-theme-toggle-button:hover {
-    color: var(--color-accent);
-    background: var(--color-accent-soft);
-  }
-  .typwiki-theme-toggle-button.is-active {
-    color: var(--color-paper);
-    background: var(--color-accent);
+  .typwiki-theme-toggle-select:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+    border-color: var(--color-accent);
   }
 
   /* breadcrumbs */

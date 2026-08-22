@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyTheme, readStoredTheme, ThemeToggle } from '../src/components/ThemeToggle.js';
 
@@ -37,41 +37,41 @@ describe('readStoredTheme', () => {
 });
 
 describe('ThemeToggle', () => {
-  it('renders the three choices with system active initially', () => {
+  it('renders a select with the three choices and system selected initially', () => {
     render(<ThemeToggle />);
-    const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(3);
-    expect(buttons.map((button) => button.textContent)).toEqual(['Light', 'Dark', 'System']);
-    expect(buttons[2].getAttribute('aria-pressed')).toBe('true');
+    const select = screen.getByRole('combobox') as HTMLSelectElement;
+    expect(select.value).toBe('system');
+    const options = screen.getAllByRole('option');
+    expect(options.map((option) => option.textContent)).toEqual(['Light', 'Dark', 'System']);
   });
 
   it('applies the stored theme on mount', () => {
     window.localStorage.setItem('typwiki-theme', 'dark');
     render(<ThemeToggle />);
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-    expect(screen.getByText('Dark').getAttribute('aria-pressed')).toBe('true');
+    expect((screen.getByRole('combobox') as HTMLSelectElement).value).toBe('dark');
   });
 
-  it('persists and applies a clicked choice', () => {
+  it('persists and applies a selected choice', () => {
     render(<ThemeToggle />);
     act(() => {
-      screen.getByText('Dark').click();
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'dark' } });
     });
     expect(window.localStorage.getItem('typwiki-theme')).toBe('dark');
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-    expect(screen.getByText('Dark').getAttribute('aria-pressed')).toBe('true');
+    expect((screen.getByRole('combobox') as HTMLSelectElement).value).toBe('dark');
   });
 
-  it('switching to system removes the stored pin but keeps a data-theme attribute', () => {
+  it('switching to system stores the choice and keeps a data-theme attribute', () => {
     render(<ThemeToggle />);
     act(() => {
-      screen.getByText('Light').click();
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'light' } });
     });
     act(() => {
-      screen.getByText('System').click();
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'system' } });
     });
     expect(window.localStorage.getItem('typwiki-theme')).toBe('system');
     expect(document.documentElement.getAttribute('data-theme')).toBe('system');
-    expect(screen.getByText('System').getAttribute('aria-pressed')).toBe('true');
+    expect((screen.getByRole('combobox') as HTMLSelectElement).value).toBe('system');
   });
 });
