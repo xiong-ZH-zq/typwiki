@@ -529,9 +529,26 @@
   .typwiki-article a:hover {
     color: var(--color-accent-strong);
   }
-  .typwiki-article ul,
-  .typwiki-article ol {
+  .typwiki-article ul {
+    list-style-type: disc;
+    list-style-position: outside;
+    margin: 0 0 1rem;
     padding-left: 1.5rem;
+  }
+  .typwiki-article ol {
+    list-style-type: decimal;
+    list-style-position: outside;
+    margin: 0 0 1rem;
+    padding-left: 1.5rem;
+  }
+  .typwiki-article ul ul {
+    list-style-type: circle;
+  }
+  .typwiki-article ul ul ul {
+    list-style-type: square;
+  }
+  .typwiki-article li {
+    margin: 0.25rem 0;
   }
   .typwiki-article li::marker {
     color: var(--color-accent);
