@@ -5,11 +5,21 @@ A small but efficient static wiki system based on Typst typesetting languages. �
 Typwiki:
 
 - is aimed for **pure text writing** for all kinds of knowledge storage.
-- supports **backlinks**, **tags**, **code highlighting**, **math formulas** and **bibliography**.
+- supports **backlinks**, **tags**, **outgoing links**, **related pages**, **code highlighting**, **math formulas** and **bibliography**.
 - is easy to be extended with your own typst templates or theme.
 - can be used with live server for **live preview**.
+- ships with **client-side search** and a **light/dark/system theme toggle**.
 
-In addtion, typwiki would be highly customizable (Themes, typst templates).
+In addition, typwiki is highly customizable (themes, typst templates).
+
+### Architecture
+
+Pages are authored in Typst and typeset by the Typst compiler. The output is
+wrapped in a **React server-rendered shell** (nav, breadcrumbs, table of
+contents, relations, footer) and deployed as plain static HTML — it works on
+GitHub Pages and without JavaScript. In the browser, the same React tree
+hydrates to power search and the color-scheme toggle. The build pipeline is
+TypeScript (tsx + Vite + Tailwind).
 
 
 ## Requirements
@@ -57,18 +67,42 @@ A default minimal template is given in `lib` directory, the method to use this t
 Typst is a great typesetting system. See #wiki("knowledge/graph")[graph] for more details.
 ```
 
-- `tag-table` displays the current page's tags and pages sharing each tag.
-- `link-table` displays backlinks to the current page.
+- `tag-table` and `link-table` control which relation sections the site shell
+  renders for this page (tags, backlinks, outgoing links, related pages). They
+  are metadata flags only — the shell, not Typst, renders the actual sections.
 
 ### Themes
 
-Themes are visual assets kept separate from page content and graph logic. The default `academic-paper` theme lives at `assets/themes/academic-paper/theme.css` and is selected in `typwiki.config.ts`:
+Typwiki is styled with Tailwind CSS design tokens. The built-in look lives in
+`src/styles/index.css` as `@theme` tokens (e.g. `--color-accent`,
+`--color-paper`, `--font-serif`); user themes are variable override layers.
+
+A theme is a directory at `assets/themes/<theme-id>/` with a `theme.css` at its
+root, selected in `typwiki.config.ts`:
 
 ```ts
 theme: "academic-paper",
 ```
 
-To create another theme, copy that directory to `assets/themes/<theme-id>/`, keep a `theme.css` file at its root, then change `theme` and rebuild. Theme assets are copied to `public/assets/themes/<theme-id>/`; the selected stylesheet is mounted automatically on generated pages and the static home page. The theme does not change page IDs, links, tags, or output routing.
+To create your own theme, copy that directory and override the tokens — no
+component code changes:
+
+```css
+/* assets/themes/my-theme/theme.css */
+:root {
+  --color-accent: #e63946;   /* re-skins every accent in the site */
+  --color-paper:  #faf8f0;
+  --font-serif:   Georgia, serif;
+}
+```
+
+Theme assets are copied to `public/assets/themes/<theme-id>/`; the selected
+stylesheet is mounted after the base `styles.css` on generated pages and the
+static home page. Themes never change page IDs, links, tags, or output routing.
+This matches the customization model of Docusaurus/Infima and MkDocs Material.
+
+Dark mode is driven by a `data-theme` attribute on `<html>` (set by the theme
+toggle) with a `prefers-color-scheme` fallback when JavaScript is off.
 
 ### Page IDs and Routes
 
