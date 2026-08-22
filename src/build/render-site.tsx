@@ -16,6 +16,7 @@ import type { SiteIndex, SitePage } from '../model.js';
 import { TypwikiError } from '../model.js';
 import { extractHeadings } from './article.js';
 import { escapeHtml } from './html.js';
+import { extractText } from './search-index.js';
 
 /** The site-wide asset hrefs and script references used by generated pages. */
 export interface SiteAssets {
@@ -94,6 +95,19 @@ export function extractTypstDocument(html: string): { title: string; head: strin
  * @returns A complete HTML document following the stable shell contract.
  */
 export function renderArticlePage(html: string, options: { index: SiteIndex; page: SitePage; assets: SiteAssets }): string {
+  return renderArticlePageResult(html, options).html;
+}
+
+/**
+ * Like {@link renderArticlePage} but also returns the plain article text, so
+ * the build pipeline can assemble the static search index in one pass.
+ *
+ * @returns The rendered HTML plus the article's plain text (for search).
+ */
+export function renderArticlePageResult(
+  html: string,
+  options: { index: SiteIndex; page: SitePage; assets: SiteAssets },
+): { html: string; text: string } {
   const { index, page, assets } = options;
   const document = extractTypstDocument(html);
   const extracted = extractHeadings(document.body);
@@ -117,13 +131,14 @@ export function renderArticlePage(html: string, options: { index: SiteIndex; pag
       linkTable={page.linkTable}
     />,
   );
-  return assembleDocument({
+  const rendered = assembleDocument({
     title: page.title,
     head: document.head,
     assets,
     bodyHtml: shellHtml,
     data,
   });
+  return { html: rendered, text: extractText(document.body) };
 }
 
 /**
@@ -133,7 +148,7 @@ export function renderArticlePage(html: string, options: { index: SiteIndex; pag
  * @param options The site index subset, theme stylesheet, and hydration bundle href.
  * @returns A complete HTML document for the root homepage.
  */
-export function renderHomePage(options: { index: Pick<SiteIndex, 'baseUrl' | 'routing' | 'pages'>; assets: SiteAssets }): string {
+export function renderHomePage(options: { index: SiteIndex; assets: SiteAssets }): string {
   const { index, assets } = options;
   const bodyHtml = renderToString(<HomePage index={index} />);
   return assembleDocument({

@@ -1,14 +1,16 @@
 // renderer.ts
 // This module provides the rendering functionality for Typwiki.
 // It compiles Typst files into HTML using the Typst compiler, then wraps the
-// output in the React site shell via `render-site.tsx`.
+// output in the React site shell via `render-site.tsx`, and finally assembles
+// the static search index from the rendered article text.
 
 import { spawn } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import type { TypwikiConfig } from '../typwiki.config.js';
 import { publishTheme, themeStylesheetHref } from './assets.js';
-import { renderArticlePage, renderHomePage, type SiteAssets } from './build/render-site.js';
+import { renderArticlePageResult, renderHomePage, type SiteAssets } from './build/render-site.js';
+import { buildSearchIndex } from './build/search-index.js';
 import type { SiteIndex, SitePage } from './model.js';
 import { TypwikiError } from './model.js';
 import { pageOutputPath } from './routing.js';
@@ -22,6 +24,7 @@ export async function renderSite(config: TypwikiConfig, index: SiteIndex): Promi
     clientScript: `${index.baseUrl}/assets/client.js`,
   };
 
+  const texts: Record<string, string> = {};
   for (const page of index.pages) {
     const input = join(config.root, page.file);
     const output = pageOutputPath(config.root, config.publicDir, index.routing, page.id);
@@ -31,8 +34,15 @@ export async function renderSite(config: TypwikiConfig, index: SiteIndex): Promi
       throw new TypwikiError([{ file: page.file, message: result.stderr.trim() || 'Typst HTML compilation failed.' }]);
     }
     const html = await readFile(output, 'utf8');
-    await writeFile(output, renderArticlePage(html, { index, page, assets }), 'utf8');
+    const rendered = renderArticlePageResult(html, { index, page, assets });
+    await writeFile(output, rendered.html, 'utf8');
+    texts[page.id] = rendered.text;
   }
+
+  const searchIndex = buildSearchIndex(index, texts);
+  const searchOutput = join(config.root, config.publicDir, 'assets', 'search-index.json');
+  await mkdir(dirname(searchOutput), { recursive: true });
+  await writeFile(searchOutput, `${JSON.stringify(searchIndex)}\n`, 'utf8');
 
   const home = join(config.root, config.publicDir, 'index.html');
   await mkdir(dirname(home), { recursive: true });

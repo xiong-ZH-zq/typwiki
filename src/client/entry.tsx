@@ -1,8 +1,8 @@
 // entry.tsx
 // Client-side hydration entry. Reads the page data embedded by the build
 // pipeline (`#typwiki-data`), then hydrates the same React shell that was
-// server-rendered into `#typwiki-root`. Interactive regions (search, theme
-// toggle) mount on top of this in later milestones.
+// server-rendered into `#typwiki-root`. The header carries the interactive
+// regions (search box and color-scheme toggle), which mount on hydration.
 
 import { hydrateRoot } from 'react-dom/client';
 import type { PageData } from '../build/render-site.js';

@@ -1,11 +1,11 @@
-// search.ts
-// This module builds the compact static search index for the client-side search
-// box. It is a pure-data module: it consumes the prepared SiteIndex and the
-// rendered article text and produces a small JSON-serializable structure that
-// the client script can fetch and filter without a server.
+// search-index.ts
+// Builds the compact static search index for the client-side search box.
+// It is a pure-data module: it consumes the prepared SiteIndex and the rendered
+// article text and produces a small JSON-serializable structure that the client
+// script can fetch and filter without a server.
 
-import type { SiteIndex } from './model.js';
-import { pageHref } from './routing.js';
+import type { SiteIndex } from '../model.js';
+import { pageHref } from './links.js';
 
 /** A single page's entry in the static search index. */
 export interface SearchIndexPage {
@@ -37,8 +37,8 @@ export interface SearchIndex {
  * @returns The plain-text content, whitespace-normalized.
  *
  * @example
- * extractText("<p>Hello <em>world</em> &amp; friends</p>");
- * // "Hello world & friends"
+ * extractText('<p>Hello <em>world</em> &amp; friends</p>');
+ * // 'Hello world & friends'
  */
 export function extractText(html: string): string {
   return html
@@ -64,8 +64,8 @@ export function extractText(html: string): string {
  * @returns A compact search index ready for JSON serialization.
  *
  * @example
- * buildSearchIndex(index([page({ id: "home", title: "Home" })]), { home: "welcome" });
- * // { version: 1, baseUrl: "", pages: [{ id: "home", title: "Home", href: "/p/home/", tags: [], text: "welcome" }] }
+ * buildSearchIndex(index([page({ id: 'home', title: 'Home' })]), { home: 'welcome' });
+ * // { version: 1, baseUrl: '', pages: [{ id: 'home', title: 'Home', href: '/p/home/', tags: [], text: 'welcome' }] }
  */
 export function buildSearchIndex(index: SiteIndex, texts: Record<string, string>): SearchIndex {
   return {
