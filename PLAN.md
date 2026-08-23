@@ -117,6 +117,23 @@ and reloads browsers via SSE, surfacing build diagnostics in an overlay.
 
 ## Future Work
 
-- Incremental index/rendering caches (benchmark first).
-- More built-in themes and a theme-authoring guide.
-- Typst 0.15 HTML export is experimental; watch for changes in generated markup.
+Here are the features that will be realized in future:
+
+- [ ] Optional pages navigation in left side bar;
+- [ ] Footnotes and figure captions in right sidebar;
+- [ ] Auto generating tags page that contains all possible tags;
+- [ ] Auto generating single tag summary page;
+- [ ] Standalone search result page;
+- [ ] Favicon and logo customization;
+
+Some features are not that necessary as the goal of this project is minimal and useful, but they would be taken into consideration if possible:
+
+- [ ] Link graphs;
+- [ ] i18n (multilingual contents);
+- [ ] RSS Feed;
+
+Also, some features can be realized in typst template. The project will give an example of these features in `typwiki.typ`. Users can also customize their own:
+
+- [ ] Github-flavoured callout blocks.
+- [ ] Enhanced codeblocks.
+
